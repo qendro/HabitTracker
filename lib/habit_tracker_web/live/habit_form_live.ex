@@ -5,6 +5,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
 
   alias HabitTracker.Tracker
   alias HabitTracker.Tracker.Habit
+  alias HabitTrackerWeb.HabitComponents
 
   @colors [
     "#3B82F6",  # Blue
@@ -44,7 +45,6 @@ defmodule HabitTrackerWeb.HabitFormLive do
           type: :binary,
           occurrence_schedule: %{"type" => "daily"},
           goal_horizon: :daily,
-          active: true,
           icon: "⭐",
           color: "#3B82F6"
         }, "New Habit"}
@@ -244,29 +244,36 @@ defmodule HabitTrackerWeb.HabitFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
-      <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-cyan-50/30 app-container">
+      <%!-- Subtle animated background blobs --%>
+      <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl animate-blob"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-indigo-200/20 to-blue-200/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        <div class="absolute top-1/2 left-1/2 w-72 h-72 bg-gradient-to-br from-cyan-200/20 to-teal-200/20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div class="relative max-w-3xl mx-auto px-4 py-8">
         <%!-- Header --%>
         <div class="mb-8">
           <.link
             navigate={~p"/app/habits"}
-            class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-all mb-4 spring-bounce hover-lift"
+            class="inline-flex items-center text-blue-600 hover:text-cyan-600 transition-all mb-4 spring-bounce hover-lift"
           >
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
             Back to Habits
           </.link>
-          <h1 class="text-5xl font-extrabold text-gradient mb-3">
+          <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-3">
             <%= @page_title %>
           </h1>
-          <p class="text-lg text-gray-600 dark:text-gray-400">
+          <p class="text-lg text-gray-600">
             <%= if @mode == :new, do: "Let's build a habit that sticks ✨", else: "Update your habit details" %>
           </p>
         </div>
 
         <%!-- Form Card --%>
-        <div class="glass-card p-10">
+        <div class="relative bg-white rounded-2xl shadow-sm border border-gray-100 p-10">
           <.form
             for={@form}
             id="habit-form"
@@ -277,11 +284,11 @@ defmodule HabitTrackerWeb.HabitFormLive do
             <%!-- Essential Fields --%>
             <div class="space-y-6">
               <%!-- Form Errors --%>
-              <div :if={@form.errors != []} class="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
-                <p class="text-sm font-medium text-red-800 dark:text-red-400 mb-2">
+              <div :if={@form.errors != []} class="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                <p class="text-sm font-medium text-red-800 mb-2">
                   Please fix the following errors:
                 </p>
-                <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
                   <%= for {field, errors} <- @form.errors do %>
                     <%= for error <- List.wrap(errors) do %>
                       <li><%= "#{field}: #{error}" %></li>
@@ -292,33 +299,23 @@ defmodule HabitTrackerWeb.HabitFormLive do
 
               <%!-- Name with Icon & Color Preview --%>
               <div>
-                <label class="block text-sm font-bold text-gray-900 dark:text-white mb-4">
+                <label class="block text-sm font-bold text-gray-900 mb-4">
                   What habit do you want to build?
                 </label>
                 <div class="flex items-start gap-4">
-                  <%!-- Icon & Color Preview Stack --%>
-                  <div class="flex flex-col gap-3">
-                    <%!-- Icon Preview Button --%>
-                    <button
-                      type="button"
-                      phx-click="toggle_emoji_picker"
-                      class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-lg hover:shadow-xl transition-all spring-bounce hover-lift"
-                      style={"background-color: #{@selected_color}"}
-                      title="Click to change icon"
-                    >
-                      <%= @selected_icon %>
-                    </button>
-                    
-                    <%!-- Color Swatch Button --%>
-                    <button
-                      type="button"
-                      phx-click="toggle_color_picker"
-                      class="w-20 h-10 rounded-xl shadow-lg hover:shadow-xl transition-all spring-bounce hover-lift border-2 border-white dark:border-gray-700"
-                      style={"background-color: #{@selected_color}"}
-                      title="Click to change color"
-                    >
-                    </button>
-                  </div>
+                  <%!-- Icon Preview Button --%>
+                  <button
+                    type="button"
+                    phx-click="toggle_emoji_picker"
+                    class="shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                    title="Click to change icon"
+                  >
+                    <HabitComponents.habit_icon 
+                      icon={@selected_icon} 
+                      color={@selected_color} 
+                      size="lg"
+                    />
+                  </button>
                   
                   <%!-- Name Input --%>
                   <div class="flex-1">
@@ -328,19 +325,29 @@ defmodule HabitTrackerWeb.HabitFormLive do
                       id="habit-name"
                       value={@form[:name].value}
                       placeholder="e.g., Morning Exercise, Read 30 minutes, Drink Water"
-                      class="w-full px-5 py-4 text-lg border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 dark:focus:ring-indigo-900/30 dark:bg-gray-700 dark:text-white transition-all spring-bounce"
+                      class="w-full px-5 py-4 text-lg text-gray-900 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 transition-all spring-bounce"
                       required
                     />
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                    <p class="text-xs text-gray-500 mt-2 font-medium">
                       💡 Click the icon or color to customize
                     </p>
                   </div>
                 </div>
+                
+                <%!-- Color Swatch Button --%>
+                <button
+                  type="button"
+                  phx-click="toggle_color_picker"
+                  class="mt-3 w-20 h-10 rounded-xl shadow-lg hover:shadow-xl transition-all spring-bounce hover-lift border-2 border-white"
+                  style={"background-color: #{@selected_color}"}
+                  title="Click to change color"
+                >
+                </button>
               </div>
 
               <%!-- Habit Type (Compact & Clean) --%>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   How do you track it?
                 </label>
                 <div class="grid grid-cols-3 gap-2">
@@ -351,13 +358,13 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     class={[
                       "relative flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all",
                       if(@form[:type].value == :binary,
-                        do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
-                        else: "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                        do: "border-blue-500 bg-blue-50",
+                        else: "border-gray-200 hover:border-gray-300 bg-white"
                       )
                     ]}
                   >
-                    <div class="text-2xl mb-1">✓</div>
-                    <div class="font-medium text-gray-900 dark:text-white text-xs">Yes/No</div>
+                    <div class="text-2xl mb-1 text-gray-700">✓</div>
+                    <div class="font-medium text-gray-900 text-xs">Yes/No</div>
                   </button>
 
                   <button
@@ -367,13 +374,13 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     class={[
                       "relative flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all",
                       if(@form[:type].value == :numeric,
-                        do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
-                        else: "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                        do: "border-blue-500 bg-blue-50",
+                        else: "border-gray-200 hover:border-gray-300 bg-white"
                       )
                     ]}
                   >
-                    <div class="text-2xl mb-1">#</div>
-                    <div class="font-medium text-gray-900 dark:text-white text-xs">Count</div>
+                    <div class="text-2xl mb-1 text-gray-700">#</div>
+                    <div class="font-medium text-gray-900 text-xs">Count</div>
                   </button>
 
                   <button
@@ -383,13 +390,13 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     class={[
                       "relative flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all",
                       if(@form[:type].value == :duration,
-                        do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
-                        else: "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                        do: "border-blue-500 bg-blue-50",
+                        else: "border-gray-200 hover:border-gray-300 bg-white"
                       )
                     ]}
                   >
-                    <div class="text-2xl mb-1">⏱</div>
-                    <div class="font-medium text-gray-900 dark:text-white text-xs">Time</div>
+                    <div class="text-2xl mb-1 text-gray-700">⏱</div>
+                    <div class="font-medium text-gray-900 text-xs">Time</div>
                   </button>
                 </div>
                 <%!-- Hidden input to submit the type --%>
@@ -399,7 +406,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
               <%!-- Target Value (Inline for numeric/duration) --%>
               <div :if={@form[:type].value in [:numeric, :duration]} class="flex gap-3">
                 <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
                     <%= if @form[:type].value == :duration, do: "Target (minutes)", else: "Target" %>
                   </label>
                   <input
@@ -409,12 +416,12 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     step={if @form[:type].value == :numeric, do: "0.01", else: "1"}
                     min="0"
                     placeholder={if @form[:type].value == :duration, do: "30", else: "8"}
-                    class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                    class="w-full px-4 py-2.5 text-gray-900 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
                 </div>
                 <div :if={@form[:type].value == :numeric} class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
                     Unit (optional)
                   </label>
                   <input
@@ -422,14 +429,14 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     name="habit[unit_label]"
                     value={@form[:unit_label].value}
                     placeholder="glasses, pages, km"
-                    class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                    class="w-full px-4 py-2.5 text-gray-900 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
               </div>
 
               <%!-- Schedule (Clean with Quick Select) --%>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Which days?
                 </label>
                 
@@ -442,7 +449,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
                       "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all",
                       if(@selected_weekdays == [1, 2, 3, 4, 5, 6, 7],
                         do: "bg-blue-500 text-white shadow-md",
-                        else: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       )
                     ]}
                   >
@@ -455,7 +462,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
                       "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all",
                       if(@selected_weekdays == [1, 2, 3, 4, 5],
                         do: "bg-blue-500 text-white shadow-md",
-                        else: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        else: "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       )
                     ]}
                   >
@@ -474,7 +481,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
                         "py-2.5 rounded-lg text-sm font-medium transition-all",
                         if(day_num in @selected_weekdays,
                           do: "bg-blue-500 text-white shadow-sm",
-                          else: "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+                          else: "bg-gray-100 text-gray-500 hover:bg-gray-200"
                         )
                       ]}
                     >
@@ -486,13 +493,13 @@ defmodule HabitTrackerWeb.HabitFormLive do
             </div>
 
             <%!-- Advanced Options (Collapsible) --%>
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <div class="border-t border-gray-200 pt-6">
               <button
                 type="button"
                 phx-click="toggle_advanced"
                 class="flex items-center justify-between w-full text-left"
               >
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span class="text-sm font-medium text-gray-700">
                   Advanced Options
                 </span>
                 <svg
@@ -510,25 +517,25 @@ defmodule HabitTrackerWeb.HabitFormLive do
 
               <div :if={@show_advanced} class="mt-4 space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
                     Description
                   </label>
                   <textarea
                     name="habit[description]"
                     rows="3"
                     placeholder="Add any notes or details about this habit..."
-                    class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white resize-none"
+                    class="w-full px-4 py-2.5 text-gray-900 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none"
                   >{@form[:description].value}</textarea>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
                       Goal Horizon
                     </label>
                     <select
                       name="habit[goal_horizon]"
-                      class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                      class="w-full px-4 py-2.5 text-gray-900 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     >
                       <option value="daily" selected={@form[:goal_horizon].value == :daily}>
                         Daily
@@ -546,7 +553,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
                   </div>
 
                   <div :if={@form[:goal_horizon].value != :daily}>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
                       Times per <%= @form[:goal_horizon].value %>
                     </label>
                     <input
@@ -554,7 +561,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
                       name="habit[frequency_goal]"
                       value={@form[:frequency_goal].value}
                       min="1"
-                      class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                      class="w-full px-4 py-2.5 text-gray-900 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                       required
                     />
                   </div>
@@ -563,16 +570,16 @@ defmodule HabitTrackerWeb.HabitFormLive do
             </div>
 
             <%!-- Action Buttons --%>
-            <div class="flex items-center justify-between pt-8 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between pt-8 border-t border-gray-200">
               <.link
                 navigate={~p"/app/habits"}
-                class="px-8 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all font-semibold spring-bounce"
+                class="px-8 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-all font-semibold spring-bounce"
               >
                 Cancel
               </.link>
               <button
                 type="submit"
-                class="px-10 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all spring-bounce hover-lift text-lg"
+                class="px-10 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 text-white rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all spring-bounce hover-lift text-lg"
               >
                 <%= if @mode == :new, do: "✨ Create Habit", else: "💾 Save Changes" %>
               </button>
@@ -586,16 +593,16 @@ defmodule HabitTrackerWeb.HabitFormLive do
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           phx-click="close_pickers"
         >
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
             <%!-- Modal Header --%>
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">
                 Choose an Icon
               </h3>
               <button
                 type="button"
                 phx-click="close_pickers"
-                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -614,8 +621,8 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     class={[
                       "w-12 h-12 rounded-lg text-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95",
                       if(@selected_icon == emoji,
-                        do: "bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500 scale-105",
-                        else: "hover:bg-gray-100 dark:hover:bg-gray-700"
+                        do: "bg-blue-100 ring-2 ring-blue-500 scale-105",
+                        else: "hover:bg-gray-100"
                       )
                     ]}
                     title={emoji}
@@ -634,16 +641,16 @@ defmodule HabitTrackerWeb.HabitFormLive do
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           phx-click="close_pickers"
         >
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full">
             <%!-- Modal Header --%>
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">
                 Choose a Color
               </h3>
               <button
                 type="button"
                 phx-click="close_pickers"
-                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -662,7 +669,7 @@ defmodule HabitTrackerWeb.HabitFormLive do
                     class={[
                       "w-16 h-16 rounded-xl transition-all hover:scale-110 active:scale-95 shadow-md hover:shadow-lg",
                       if(@selected_color == color,
-                        do: "ring-4 ring-blue-500 dark:ring-blue-400 ring-offset-2 dark:ring-offset-gray-800 scale-105",
+                        do: "ring-4 ring-blue-500 ring-offset-2 scale-105",
                         else: ""
                       )
                     ]}

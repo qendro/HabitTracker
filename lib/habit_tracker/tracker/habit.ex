@@ -14,7 +14,6 @@ defmodule HabitTracker.Tracker.Habit do
     field :frequency_goal, :integer
     field :occurrence_schedule, :map
     field :position, :integer, default: 0
-    field :active, :boolean, default: true
     field :deleted_at, :utc_datetime
 
     belongs_to :user, HabitTracker.Accounts.User
@@ -33,8 +32,7 @@ defmodule HabitTracker.Tracker.Habit do
     :goal_horizon,
     :frequency_goal,
     :occurrence_schedule,
-    :position,
-    :active
+    :position
   ]
 
   @required_fields [:name, :type, :goal_horizon, :occurrence_schedule]
@@ -51,7 +49,7 @@ defmodule HabitTracker.Tracker.Habit do
   end
 
   def soft_delete_changeset(habit) do
-    change(habit, deleted_at: DateTime.utc_now(:second), active: false)
+    change(habit, deleted_at: DateTime.utc_now(:second))
   end
 
   defp validate_frequency_goal(changeset) do

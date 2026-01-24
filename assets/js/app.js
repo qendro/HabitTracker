@@ -37,27 +37,34 @@ const TimezoneDetect = {
   },
 }
 
-const ThemeSync = {
+const ScrollHeader = {
   mounted() {
-    this.handleEvent("theme-changed", ({theme}) => {
-      const setTheme = (theme) => {
-        if (theme === "system") {
-          localStorage.removeItem("phx:theme");
-          document.documentElement.removeAttribute("data-theme");
-          // Apply system preference
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (prefersDark) {
-            document.documentElement.setAttribute("data-theme", "dark");
-          } else {
-            document.documentElement.setAttribute("data-theme", "light");
-          }
-        } else {
-          localStorage.setItem("phx:theme", theme);
-          document.documentElement.setAttribute("data-theme", theme);
-        }
-      };
-      setTheme(theme);
-    });
+    let lastScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
+    const header = this.el
+    
+    const handleScroll = () => {
+      const currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
+      
+      if (currentScroll <= 10) {
+        header.style.transform = 'translateY(0)'
+      } else if (currentScroll > lastScroll && currentScroll > 50) {
+        header.style.transform = 'translateY(-100%)'
+      } else if (currentScroll < lastScroll) {
+        header.style.transform = 'translateY(0)'
+      }
+      
+      lastScroll = currentScroll <= 0 ? 0 : currentScroll
+    }
+    
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
+    this.cleanup = () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  },
+  
+  destroyed() {
+    if (this.cleanup) this.cleanup()
   }
 }
 
@@ -65,7 +72,7 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {TimezoneDetect, ThemeSync}, // ...colocatedHooks removed temporarily
+  hooks: {TimezoneDetect, ScrollHeader}, // ...colocatedHooks removed temporarily
 })
 
 // Show progress bar on live navigation and form submits

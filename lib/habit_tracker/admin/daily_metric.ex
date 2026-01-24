@@ -13,7 +13,6 @@ defmodule HabitTracker.Admin.DailyMetric do
     field :wau, :integer
     field :mau, :integer
     field :total_habits, :integer
-    field :active_habits, :integer
     field :completions_today, :integer
     field :avg_completion_rate, :float
 
@@ -31,7 +30,6 @@ defmodule HabitTracker.Admin.DailyMetric do
       :wau,
       :mau,
       :total_habits,
-      :active_habits,
       :completions_today,
       :avg_completion_rate
     ])
@@ -43,7 +41,6 @@ defmodule HabitTracker.Admin.DailyMetric do
       :wau,
       :mau,
       :total_habits,
-      :active_habits,
       :completions_today,
       :avg_completion_rate
     ])

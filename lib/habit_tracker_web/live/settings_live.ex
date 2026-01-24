@@ -12,14 +12,13 @@ defmodule HabitTrackerWeb.SettingsLive do
      |> assign(:page_title, "Settings")
      |> assign(:user, user)
      |> assign(:timezone_form, to_form(Accounts.change_user_timezone(user, %{})))
-     |> assign(:theme, user.theme)
      |> assign(:timezones, get_timezones())
      |> assign_reminder_settings(user)}
   end
 
   defp assign_reminder_settings(socket, user) do
     reminder_settings = HabitTracker.Reminders.get_reminder_settings(user)
-    habits = HabitTracker.Tracker.list_active_habits(user)
+    habits = HabitTracker.Tracker.list_habits(user)
 
     socket
     |> assign(:reminder_settings, reminder_settings)
@@ -41,24 +40,6 @@ defmodule HabitTrackerWeb.SettingsLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, :timezone_form, to_form(changeset))}
-    end
-  end
-
-  @impl true
-  def handle_event("update_theme", %{"theme" => theme}, socket) do
-    user = socket.assigns.user
-
-    case Accounts.update_user_theme(user, theme) do
-      {:ok, updated_user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Theme updated successfully")
-         |> assign(:user, updated_user)
-         |> assign(:theme, updated_user.theme)
-         |> push_event("theme-changed", %{theme: updated_user.theme})}
-
-      {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Failed to update theme")}
     end
   end
 

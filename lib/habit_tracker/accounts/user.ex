@@ -8,7 +8,6 @@ defmodule HabitTracker.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :timezone, :string, default: "UTC"
-    field :theme, :string, default: "system"
     field :deleted_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 

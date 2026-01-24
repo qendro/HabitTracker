@@ -20,10 +20,10 @@ defmodule HabitTracker.Workers.ReminderEmailJob do
     user = Accounts.get_user!(user_id)
     date = Date.from_iso8601!(date_string)
 
-    # Get user's active habits scheduled for the date
+    # Get user's habits scheduled for the date
     habits =
       user
-      |> Tracker.list_active_habits()
+      |> Tracker.list_habits()
       |> Enum.filter(&Tracker.is_scheduled?(&1, date))
 
     # Only send email if there are habits to remind about

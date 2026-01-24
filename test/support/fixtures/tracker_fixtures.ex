@@ -12,8 +12,7 @@ defmodule HabitTracker.TrackerFixtures do
       type: :binary,
       goal_horizon: :daily,
       occurrence_schedule: %{"type" => "daily"},
-      position: 0,
-      active: true
+      position: 0
     })
   end
 

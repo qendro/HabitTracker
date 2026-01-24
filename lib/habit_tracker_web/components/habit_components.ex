@@ -6,6 +6,39 @@ defmodule HabitTrackerWeb.HabitComponents do
   import HabitTrackerWeb.CoreComponents
 
   @doc """
+  Renders a unified habit icon with consistent styling.
+
+  ## Examples
+
+      <.habit_icon icon="🏃" color="#3B82F6" size="md" />
+  """
+  attr :icon, :string, required: true
+  attr :color, :string, required: true
+  attr :size, :string, default: "md" # sm, md, lg
+  attr :class, :string, default: ""
+
+  def habit_icon(assigns) do
+    {size_classes, size_px} = case assigns.size do
+      "sm" -> {"text-2xl", "48px"}
+      "md" -> {"text-3xl", "56px"}
+      "lg" -> {"text-4xl", "80px"}
+      _ -> {"text-3xl", "56px"}
+    end
+    
+    assigns = assign(assigns, :size_classes, size_classes)
+    assigns = assign(assigns, :size_px, size_px)
+    
+    ~H"""
+    <div
+      class={"relative flex items-center justify-center transition-all duration-300 #{@size_classes} #{@class}"}
+      style={"width: #{@size_px}; height: #{@size_px}; background: linear-gradient(135deg, #{@color}10, #{@color}05); color: #{@color}; border-radius: 12px; border: 2px solid #{@color}25;"}
+    >
+      <%= @icon %>
+    </div>
+    """
+  end
+
+  @doc """
   Renders a habit card with progress, streak, and action buttons.
 
   ## Examples
@@ -29,38 +62,41 @@ defmodule HabitTrackerWeb.HabitComponents do
 
   def habit_card(assigns) do
     ~H"""
-    <div id={"habit-card-#{@habit.id}"} class="habit-card-glass">
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex items-start space-x-4 flex-1 min-w-0">
-          <%!-- Icon --%>
-          <div
-            class="habit-icon-enhanced"
-            style={"background: linear-gradient(135deg, #{@habit.color}20 0%, #{@habit.color}40 100%); color: #{@habit.color}; border: 2px solid #{@habit.color}30;"}
-          >
-            <%= @habit.icon %>
-          </div>
+    <div 
+      id={"habit-card-#{@habit.id}"} 
+      class="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg p-6 mb-4 border border-gray-100 transition-all duration-300 hover:-translate-y-1"
+    >
+      <%!-- Subtle accent line on left --%>
+      <div 
+        class="absolute left-0 top-6 bottom-6 w-1 rounded-r-full transition-all duration-300 group-hover:w-1.5"
+        style={"background: linear-gradient(to bottom, #{@habit.color}, #{@habit.color}80);"}
+      >
+      </div>
+
+      <div class="flex items-start justify-between gap-4 pl-3">
+        <div class="flex items-start gap-4 flex-1 min-w-0">
+          <%!-- Icon with subtle glow effect --%>
+          <.habit_icon 
+            icon={@habit.icon} 
+            color={@habit.color} 
+            size="md"
+            class="group-hover:scale-105"
+          />
 
           <%!-- Habit Info --%>
           <div class="flex-1 min-w-0">
-            <h3 class="habit-name">
+            <h3 class="text-lg font-bold text-gray-900 mb-1 leading-tight">
               <%= @habit.name %>
             </h3>
-            <p :if={@habit.description} class="habit-description">
+            <p :if={@habit.description} class="text-sm text-gray-600 mb-3 leading-relaxed">
               <%= @habit.description %>
             </p>
 
-            <%!-- Progress --%>
-            <div class="mt-4">
+            <%!-- Progress and Streak on same line --%>
+            <div class="mt-3 flex items-center gap-3 flex-wrap">
               <%= case @progress.type do %>
                 <% :binary -> %>
-                  <span class={[
-                    "badge",
-                    case @progress.status do
-                      :complete -> "badge-success"
-                      :planned -> "badge-info"
-                      :not_complete -> "badge-neutral"
-                    end
-                  ]}>
+                  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200" style={get_status_style(@progress.status, @habit.color)}>
                     <%= case @progress.status do %>
                       <% :complete -> %>
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -72,63 +108,58 @@ defmodule HabitTrackerWeb.HabitComponents do
                         </svg>
                       <% :not_complete -> %>
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
                     <% end %>
                     <%= status_label(@progress.status) %>
-                  </span>
+                  </div>
                 <% :numeric -> %>
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm font-medium">
-                      <span class="text-gray-700 dark:text-gray-300">
+                  <div class="flex-1 space-y-2.5">
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="font-semibold text-gray-700">
                         <%= @progress.current %> / <%= @progress.target %>
                         <%= if @progress.unit, do: @progress.unit %>
                       </span>
-                      <span class={[
-                        "font-bold",
-                        if(@progress.percentage >= 100, do: "text-green-600 dark:text-green-400", else: "text-indigo-600 dark:text-indigo-400")
-                      ]}>
+                      <span class="text-lg font-bold" style={"color: #{if @progress.percentage >= 100, do: "#10b981", else: @habit.color};"}>
                         <%= @progress.percentage %>%
                       </span>
                     </div>
-                    <div class="progress-bar-enhanced">
+                    <div class="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        class="progress-fill-enhanced"
-                        style={"width: #{min(@progress.percentage, 100)}%"}
+                        class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out"
+                        style={"width: #{min(@progress.percentage, 100)}%; background: linear-gradient(90deg, #{@habit.color}, #{@habit.color}cc);"}
                       >
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shimmer"></div>
                       </div>
                     </div>
                   </div>
                 <% :duration -> %>
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between text-sm font-medium">
-                      <span class="text-gray-700 dark:text-gray-300">
+                  <div class="flex-1 space-y-2.5">
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="font-semibold text-gray-700">
                         <%= @progress.current %> / <%= @progress.target %> <%= @progress.unit %>
                       </span>
-                      <span class={[
-                        "font-bold",
-                        if(@progress.percentage >= 100, do: "text-green-600 dark:text-green-400", else: "text-purple-600 dark:text-purple-400")
-                      ]}>
+                      <span class="text-lg font-bold" style={"color: #{if @progress.percentage >= 100, do: "#10b981", else: @habit.color};"}>
                         <%= @progress.percentage %>%
                       </span>
                     </div>
-                    <div class="progress-bar-enhanced">
+                    <div class="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        class="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
-                        style={"width: #{min(@progress.percentage, 100)}%"}
+                        class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 ease-out"
+                        style={"width: #{min(@progress.percentage, 100)}%; background: linear-gradient(90deg, #{@habit.color}, #{@habit.color}cc);"}
                       >
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shimmer"></div>
                       </div>
                     </div>
                   </div>
               <% end %>
-            </div>
 
-            <%!-- Streak Badge --%>
-            <div class="mt-4 flex items-center gap-2 flex-wrap">
-              <span class="streak-badge-enhanced">
-                <span class="relative z-10">🔥 <%= @streak %> day streak</span>
-              </span>
-              <span :if={@is_future} class="text-xs text-gray-500 dark:text-gray-400 italic">
+              <%!-- Streak Badge on same line --%>
+              <div :if={@streak > 0} class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 border border-orange-200">
+                <span class="text-base">🔥</span>
+                <%= @streak %> day<%= if @streak != 1, do: "s" %>
+              </div>
+              <span :if={@is_future && @streak > 0} class="text-xs text-gray-500 italic">
                 (as of today)
               </span>
             </div>
@@ -136,16 +167,20 @@ defmodule HabitTrackerWeb.HabitComponents do
         </div>
 
         <%!-- Action Buttons --%>
-        <div class="flex flex-col items-center gap-3">
+        <div class="flex flex-col items-center gap-3 flex-shrink-0">
           <%!-- Binary habit toggle button --%>
           <button
             :if={@habit.type == :binary && !@readonly}
             phx-click="toggle_habit"
             phx-value-habit-id={@habit.id}
-            class={[
-              "toggle-enhanced ripple",
-              if(@is_complete, do: "complete", else: "incomplete")
-            ]}
+            class="relative flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+            style={
+              if @is_complete do
+                "width: 56px; height: 56px; background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); border-radius: 50%;"
+              else
+                "width: 56px; height: 56px; background: #f3f4f6; color: white; border-radius: 50%;"
+              end
+            }
             aria-label={if @is_complete, do: "Mark as incomplete", else: "Mark as complete"}
           >
             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
@@ -156,10 +191,14 @@ defmodule HabitTrackerWeb.HabitComponents do
           <%!-- Read-only indicator for binary habits --%>
           <div
             :if={@habit.type == :binary && @readonly}
-            class={[
-              "toggle-enhanced",
-              if(@is_complete, do: "complete", else: "incomplete")
-            ]}
+            class="flex items-center justify-center shadow-sm"
+            style={
+              if @is_complete do
+                "width: 56px; height: 56px; background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: white; border-radius: 50%;"
+              else
+                "width: 56px; height: 56px; background: #f3f4f6; color: white; border-radius: 50%;"
+              end
+            }
             aria-label="Read-only mode"
           >
             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
@@ -180,13 +219,14 @@ defmodule HabitTrackerWeb.HabitComponents do
               min="0"
               value={get_current_value(@log, @habit.type)}
               placeholder={get_placeholder(@habit.type, @habit.unit_label)}
-              class="w-24 px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              style="font-size: 16px;"
+              class="w-24 px-3 py-2.5 text-sm font-semibold border-2 border-gray-200 rounded-xl bg-white text-gray-900 focus:ring-2 focus:border-transparent transition-all"
+              style={"font-size: 16px; --tw-ring-color: #{@habit.color}40;"}
             />
             <input type="hidden" name="habit-id" value={@habit.id} />
             <button
               type="submit"
-              class="toggle-enhanced bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white ripple"
+              class="w-14 h-14 rounded-2xl flex items-center justify-center text-white transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+              style={"background: linear-gradient(135deg, #{@habit.color}, #{@habit.color}dd);"}
               aria-label="Log value"
             >
               <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -204,7 +244,7 @@ defmodule HabitTrackerWeb.HabitComponents do
               type="number"
               value={get_current_value(@log, @habit.type)}
               disabled
-              class="w-24 px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+              class="w-24 px-3 py-2.5 text-sm font-semibold border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-500"
               style="font-size: 16px;"
             />
           </div>
@@ -228,65 +268,85 @@ defmodule HabitTrackerWeb.HabitComponents do
     assigns = assign(assigns, :percentage, calculate_percentage(assigns.completed, assigns.total))
     assigns = assign(assigns, :all_complete, assigns.completed == assigns.total && assigns.total > 0)
     assigns = assign(assigns, :motivational_message, get_motivational_message(assigns.completed, assigns.total))
+    assigns = assign(assigns, :ring_color, get_ring_color(assigns.completed, assigns.total))
 
     ~H"""
-    <div class={[
-      "completion-summary-enhanced",
-      if(@all_complete, do: "all-complete", else: "")
-    ]}>
-      <div class="summary-content relative z-10">
-        <span class="summary-count animated-counter">
-          <%= @completed %> / <%= @total %>
-        </span>
-        <span class="summary-label">habits complete</span>
-        <p :if={@motivational_message} class="summary-motivational">
-          <%= @motivational_message %>
-        </p>
+    <div class="relative bg-gradient-to-br from-blue-50 via-white to-cyan-50 rounded-2xl shadow-sm border border-blue-100 p-6 overflow-hidden">
+      <%!-- Subtle animated background --%>
+      <div class="absolute inset-0 opacity-30">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-indigo-200 to-blue-200 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
       </div>
 
-      <%= if @all_complete do %>
-        <div class="celebration">
-          🎉
+      <div class="relative flex items-center justify-between">
+        <div class="flex-1">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <%= @completed %>
+            </span>
+            <span class="text-2xl font-bold text-gray-400">/</span>
+            <span class="text-2xl font-bold text-gray-600">
+              <%= @total %>
+            </span>
+          </div>
+          <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+            Habits Complete
+          </p>
+          <p :if={@motivational_message} class="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg">
+            <%= get_emoji(@completed, @total) %>
+            <%= @motivational_message %>
+          </p>
         </div>
-      <% end %>
 
-      <div class="relative w-28 h-28">
-        <svg class="w-full h-full transform -rotate-90 progress-ring" viewBox="0 0 100 100">
-          <%!-- Background circle --%>
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            stroke="currentColor"
-            stroke-width="8"
-            fill="none"
-            class="text-gray-200 dark:text-gray-700"
-          />
-          <%!-- Progress circle with gradient --%>
-          <defs>
-            <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
-              <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            stroke="url(#progress-gradient)"
-            stroke-width="8"
-            fill="none"
-            class="transition-all duration-500"
-            stroke-dasharray={circumference()}
-            stroke-dashoffset={circumference() * (1 - @percentage / 100)}
-            stroke-linecap="round"
-          />
-        </svg>
-        <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-2xl font-extrabold text-gray-900 dark:text-white animated-counter">
-            <%= round(@percentage) %>%
-          </span>
+        <%!-- Progress Ring --%>
+        <div class="relative w-28 h-28 flex-shrink-0">
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <%!-- Background circle --%>
+            <circle
+              cx="50"
+              cy="50"
+              r="37"
+              stroke="currentColor"
+              stroke-width="12"
+              fill="none"
+              class="text-gray-200"
+            />
+            <%!-- Progress circle --%>
+            <circle
+              cx="50"
+              cy="50"
+              r="37"
+              stroke={"url(#progress-gradient-#{@ring_color})"}
+              stroke-width="12"
+              fill="none"
+              class="transition-all duration-700 ease-out"
+              stroke-dasharray={circumference()}
+              stroke-dashoffset={circumference() * (1 - @percentage / 100)}
+              stroke-linecap="round"
+            />
+            <defs>
+              <%!-- Blue gradient for progress --%>
+              <linearGradient id="progress-gradient-progress" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+              </linearGradient>
+              <%!-- Gray for not started --%>
+              <linearGradient id="progress-gradient-none" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#6b7280;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="text-center">
+              <div class="flex items-baseline justify-center">
+                <span class={"text-lg font-extrabold #{get_percentage_color(@ring_color)}"} style="line-height: 1;">
+                  <%= round(@percentage) %>
+                </span>
+                <span class="text-xs font-bold text-gray-400" style="line-height: 1;">%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -310,54 +370,57 @@ defmodule HabitTrackerWeb.HabitComponents do
 
   def date_navigator(assigns) do
     ~H"""
-    <div class="date-nav-enhanced">
-      <button
-        phx-click="prev_day"
-        class="nav-button-enhanced"
-        aria-label="Previous day"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+    <div class="relative bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+      <div class="flex items-center justify-between gap-4">
+        <button
+          phx-click="prev_day"
+          class="w-12 h-12 rounded-xl flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 hover:scale-105 active:scale-95"
+          aria-label="Previous day"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
-      <div class="flex-1 text-center">
-        <h1 class="text-4xl font-extrabold text-gradient mb-2">
-          <%= format_date(@selected_date, @is_today) %>
-        </h1>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 font-medium">
-          <%= Calendar.strftime(@selected_date, "%A, %B %d, %Y") %>
-        </p>
-        <%!-- Calendar Picker --%>
-        <div class="flex justify-center">
-          <input
-            type="date"
-            id="date-picker"
-            value={Date.to_iso8601(@selected_date)}
-            phx-change="select_date"
-            name="date"
-            class="px-5 py-2.5 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-indigo-200 dark:focus:ring-indigo-900/30 focus:border-indigo-500 transition-all shadow-sm hover:shadow-md spring-bounce"
-            style="font-size: 16px;"
-          />
+        <div class="flex-1 text-center">
+          <h1 class="text-3xl font-extrabold mb-1">
+            <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <%= format_date(@selected_date, @is_today) %>
+            </span>
+          </h1>
+          <p class="text-sm text-gray-600 font-medium mb-3">
+            <%= Calendar.strftime(@selected_date, "%A, %B %d, %Y") %>
+          </p>
+          <div class="flex justify-center">
+            <input
+              type="date"
+              id="date-picker"
+              value={Date.to_iso8601(@selected_date)}
+              phx-change="select_date"
+              name="date"
+              class="px-4 py-2 text-sm font-semibold border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-900 hover:bg-white hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              style="font-size: 16px;"
+            />
+          </div>
         </div>
-      </div>
 
-      <button
-        phx-click="next_day"
-        class="nav-button-enhanced"
-        aria-label="Next day"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+        <button
+          phx-click="next_day"
+          class="w-12 h-12 rounded-xl flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 hover:scale-105 active:scale-95"
+          aria-label="Next day"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <%!-- Back to Today Button --%>
     <div :if={!@is_today} class="text-center mb-6">
       <button
         phx-click="back_to_today"
-        class="today-button spring-bounce"
+        class="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clip-rule="evenodd" />
@@ -370,13 +433,37 @@ defmodule HabitTrackerWeb.HabitComponents do
 
   # Helper functions
 
-  defp status_color(:complete), do: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
-  defp status_color(:planned), do: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
-  defp status_color(:not_complete), do: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400"
+  defp status_color(:complete), do: "bg-green-100 text-green-800"
+  defp status_color(:planned), do: "bg-blue-100 text-blue-800"
+  defp status_color(:not_complete), do: "bg-gray-100 text-gray-800"
 
   defp status_label(:complete), do: "Complete"
   defp status_label(:planned), do: "Planned"
   defp status_label(:not_complete), do: "Not Complete"
+
+  defp get_status_style(:complete, color) do
+    "background: linear-gradient(135deg, #{color}15, #{color}08); color: #{color}; border: 1.5px solid #{color}30;"
+  end
+  
+  defp get_status_style(:planned, _color) do
+    "background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #1e40af; border: 1.5px solid #93c5fd;"
+  end
+  
+  defp get_status_style(:not_complete, _color) do
+    "background: #f3f4f6; color: #6b7280; border: 1.5px solid #e5e7eb;"
+  end
+
+  defp get_emoji(completed, total) when completed == total and total > 0, do: "🎉"
+  defp get_emoji(completed, total) when completed > 0 do
+    percentage = completed / total * 100
+    cond do
+      percentage >= 75 -> "💫"
+      percentage >= 50 -> "👏"
+      percentage >= 25 -> "💪"
+      true -> "🌟"
+    end
+  end
+  defp get_emoji(_, _), do: "🎯"
 
   defp get_current_value(nil, _type), do: ""
   defp get_current_value(log, :numeric) do
@@ -400,15 +487,15 @@ defmodule HabitTrackerWeb.HabitComponents do
   defp calculate_percentage(_completed, 0), do: 0
   defp calculate_percentage(completed, total), do: completed / total * 100
 
-  defp circumference, do: 2 * :math.pi() * 40
+  defp circumference, do: 2 * :math.pi() * 37
 
   defp get_motivational_message(completed, total) when completed == total and total > 0 do
     messages = [
-      "You're on fire! 🔥",
-      "Perfect day! ⭐",
-      "Crushing it! 💪",
-      "Amazing work! 🎯",
-      "Keep it up! 🚀"
+      "Perfect day!",
+      "You're crushing it!",
+      "Amazing work!",
+      "All done!",
+      "Flawless!"
     ]
     Enum.random(messages)
   end
@@ -416,13 +503,20 @@ defmodule HabitTrackerWeb.HabitComponents do
   defp get_motivational_message(completed, total) when completed > 0 do
     percentage = completed / total * 100
     cond do
-      percentage >= 75 -> "Almost there! 💫"
-      percentage >= 50 -> "Great progress! 👏"
-      percentage >= 25 -> "Keep going! 💪"
-      true -> "You've got this! 🌟"
+      percentage >= 75 -> "Almost there!"
+      percentage >= 50 -> "Great progress!"
+      percentage >= 25 -> "Keep going!"
+      true -> "You've got this!"
     end
   end
 
-  defp get_motivational_message(0, total) when total > 0, do: "Let's get started! 🎯"
+  defp get_motivational_message(0, total) when total > 0, do: "Let's get started!"
   defp get_motivational_message(_, _), do: nil
+
+  defp get_ring_color(0, total) when total > 0, do: "none"
+  defp get_ring_color(completed, _total) when completed > 0, do: "progress"
+  defp get_ring_color(_, _), do: "none"
+
+  defp get_percentage_color("progress"), do: "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"
+  defp get_percentage_color("none"), do: "text-gray-500"
 end

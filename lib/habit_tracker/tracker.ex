@@ -84,23 +84,9 @@ defmodule HabitTracker.Tracker do
     |> Repo.update()
   end
 
-  def list_active_habits(%User{} = user) do
-    Habit
-    |> where([h], h.user_id == ^user.id and h.active and is_nil(h.deleted_at))
-    |> order_by([h], asc: h.position, asc: h.id)
-    |> Repo.all()
-  end
-
-  def list_all_habits(%User{} = user) do
+  def list_habits(%User{} = user) do
     Habit
     |> where([h], h.user_id == ^user.id and is_nil(h.deleted_at))
-    |> order_by([h], asc: h.position, asc: h.id)
-    |> Repo.all()
-  end
-
-  def list_inactive_habits(%User{} = user) do
-    Habit
-    |> where([h], h.user_id == ^user.id and not h.active and is_nil(h.deleted_at))
     |> order_by([h], asc: h.position, asc: h.id)
     |> Repo.all()
   end
@@ -357,11 +343,10 @@ defmodule HabitTracker.Tracker do
   def today_dashboard(%User{} = user, local_date \\ nil) do
     local_date = local_date || today_in_timezone(user.timezone)
 
-    # Load all active habits
+    # Load all habits
     habits =
       from(h in Habit,
         where: h.user_id == ^user.id,
-        where: h.active == true,
         where: is_nil(h.deleted_at),
         order_by: [asc: h.position, asc: h.id]
       )

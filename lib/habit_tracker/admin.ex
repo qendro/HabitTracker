@@ -349,10 +349,6 @@ defmodule HabitTracker.Admin do
       from(h in Habit, where: is_nil(h.deleted_at), select: count(h.id))
       |> Repo.one()
 
-    active_habits =
-      from(h in Habit, where: h.active == true and is_nil(h.deleted_at), select: count(h.id))
-      |> Repo.one()
-
     completions_today =
       from(log in HabitLog,
         where: log.local_date == ^date,
@@ -372,7 +368,6 @@ defmodule HabitTracker.Admin do
       wau: wau,
       mau: mau,
       total_habits: total_habits,
-      active_habits: active_habits,
       completions_today: completions_today,
       avg_completion_rate: avg_completion_rate
     }
@@ -416,10 +411,10 @@ defmodule HabitTracker.Admin do
 
     # Get all scheduled occurrences for the date
     # This is a simplified calculation - in reality we'd need to check each habit's schedule
-    # For now, we'll use total active habits as a proxy
+    # For now, we'll use total habits as a proxy
     total_scheduled =
       from(h in Habit,
-        where: h.active == true and is_nil(h.deleted_at),
+        where: is_nil(h.deleted_at),
         select: count(h.id)
       )
       |> Repo.one()

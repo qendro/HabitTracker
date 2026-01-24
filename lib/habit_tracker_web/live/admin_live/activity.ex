@@ -98,25 +98,25 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 class="text-3xl font-bold text-gray-900">
             Admin Activity Log
           </h1>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-2 text-sm text-gray-600">
             View all admin actions and security events
           </p>
         </div>
 
         <%!-- Filters --%>
-        <div class="mb-6 bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div class="mb-6 bg-white shadow rounded-lg border border-gray-200 p-4">
           <div class="flex items-center gap-4">
             <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
                 Filter by Action
               </label>
               <select
                 phx-change="filter_by_action"
                 name="action"
-                class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               >
                 <option value="all" selected={@filter_action == "all"}>All Actions</option>
                 <option
@@ -133,7 +133,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               <div class="pt-6">
                 <button
                   phx-click="clear_filters"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Clear Filters
                 </button>
@@ -143,24 +143,24 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
         </div>
 
         <%!-- Results Summary --%>
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mb-4 text-sm text-gray-600">
           Showing <%= length(@actions) %> of <%= @total_count %> actions
         </div>
 
         <%!-- Actions List --%>
         <%= if @actions == [] do %>
-          <div class="text-center py-12 bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div class="text-center py-12 bg-white shadow rounded-lg border border-gray-200">
             <.icon name="hero-clipboard-document-list" class="mx-auto h-12 w-12 text-gray-400" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+            <h3 class="mt-2 text-sm font-medium text-gray-900">
               No activity found
             </h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-500">
               No admin actions match the current filters
             </p>
           </div>
         <% else %>
-          <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md border border-gray-200 dark:border-gray-700">
-            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+          <div class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
+            <ul class="divide-y divide-gray-200">
               <li :for={action <- @actions} class="px-4 py-4 sm:px-6">
                 <div class="flex items-start justify-between">
                   <div class="flex-1 min-w-0">
@@ -173,24 +173,24 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
                       </span>
 
                       <%= if action.success do %>
-                        <span class="inline-flex items-center text-xs text-green-600 dark:text-green-400">
+                        <span class="inline-flex items-center text-xs text-green-600">
                           <.icon name="hero-check-circle" class="w-4 h-4 mr-1" />
                           Success
                         </span>
                       <% else %>
-                        <span class="inline-flex items-center text-xs text-red-600 dark:text-red-400">
+                        <span class="inline-flex items-center text-xs text-red-600">
                           <.icon name="hero-x-circle" class="w-4 h-4 mr-1" />
                           Failed
                         </span>
                       <% end %>
                     </div>
 
-                    <div class="text-sm text-gray-900 dark:text-gray-100">
+                    <div class="text-sm text-gray-900">
                       <span class="font-medium"><%= action.admin.email %></span>
                       <%= action_description(action) %>
                     </div>
 
-                    <div class="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                    <div class="mt-2 flex items-center gap-4 text-xs text-gray-500">
                       <span>
                         <.icon name="hero-clock" class="w-3 h-3 inline mr-1" />
                         <%= format_datetime(action.inserted_at) %>
@@ -204,9 +204,9 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
                     </div>
 
                     <%= if !action.success && action.metadata do %>
-                      <div class="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs">
-                        <span class="font-medium text-red-800 dark:text-red-300">Error:</span>
-                        <pre class="mt-1 text-red-700 dark:text-red-400 whitespace-pre-wrap"><%= inspect(
+                      <div class="mt-2 p-2 bg-red-50 rounded text-xs">
+                        <span class="font-medium text-red-800">Error:</span>
+                        <pre class="mt-1 text-red-700 whitespace-pre-wrap"><%= inspect(
                             action.metadata,
                             pretty: true
                           ) %></pre>
@@ -227,8 +227,8 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
                 "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
                 if(@has_prev,
                   do:
-                    "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600",
-                  else: "border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                    "border-gray-300 text-gray-700 bg-white hover:bg-gray-50",
+                  else: "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
                 )
               ]}
             >
@@ -236,7 +236,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               Previous
             </button>
 
-            <span class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="text-sm text-gray-600">
               Page <%= @page %>
             </span>
 
@@ -247,8 +247,8 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
                 "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
                 if(@has_more,
                   do:
-                    "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600",
-                  else: "border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                    "border-gray-300 text-gray-700 bg-white hover:bg-gray-50",
+                  else: "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
                 )
               ]}
             >
@@ -272,13 +272,13 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
 
   defp action_badge_class(action) do
     case action do
-      "view_as_started" -> "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-      "view_as_ended" -> "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-      "deactivate_user" -> "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-      "reactivate_user" -> "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-      "delete_user_requested" -> "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-      "force_password_reset" -> "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
-      _ -> "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+      "view_as_started" -> "bg-blue-100 text-blue-800"
+      "view_as_ended" -> "bg-blue-100 text-blue-800"
+      "deactivate_user" -> "bg-yellow-100 text-yellow-800"
+      "reactivate_user" -> "bg-green-100 text-green-800"
+      "delete_user_requested" -> "bg-red-100 text-red-800"
+      "force_password_reset" -> "bg-purple-100 text-purple-800"
+      _ -> "bg-gray-100 text-gray-800"
     end
   end
 

@@ -307,17 +307,6 @@ defmodule HabitTracker.Accounts do
   end
 
   @doc """
-  Updates the user theme preference.
-  """
-  def update_user_theme(user, theme) when theme in ["light", "dark", "system"] do
-    user
-    |> Ecto.Changeset.change(theme: theme)
-    |> Repo.update()
-  end
-
-  def update_user_theme(_user, _theme), do: {:error, :invalid_theme}
-
-  @doc """
   Soft deletes a user by setting the deleted_at timestamp.
   """
   def soft_delete_user(user) do

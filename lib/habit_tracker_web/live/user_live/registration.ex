@@ -8,29 +8,29 @@ defmodule HabitTrackerWeb.UserLive.Registration do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 py-12">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full space-y-8">
         <%!-- Logo/Header --%>
         <div class="text-center">
-          <div class="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4">
-            <span class="text-3xl">✅</span>
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+            <span class="text-white text-3xl font-bold">H</span>
           </div>
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-3">
             Create your account
           </h2>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-base text-gray-600">
             Already have an account?
-            <.link navigate={~p"/users/log-in"} class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+            <.link navigate={~p"/users/log-in"} class="font-semibold text-blue-600 hover:text-cyan-600 transition-colors">
               Sign in
             </.link>
           </p>
         </div>
 
         <%!-- Registration Form --%>
-        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
+        <div class="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-8 border border-gray-100">
           <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate" class="space-y-6">
             <div>
-              <label for="registration_form_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="registration_form_email" class="block text-sm font-semibold text-gray-900 mb-2">
                 Email address
               </label>
               <input
@@ -41,14 +41,14 @@ defmodule HabitTrackerWeb.UserLive.Registration do
                 autocomplete="username"
                 required
                 phx-mounted={JS.focus()}
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
                 placeholder="you@example.com"
                 style="font-size: 16px;"
               />
             </div>
 
             <div>
-              <label for="registration_form_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="registration_form_password" class="block text-sm font-semibold text-gray-900 mb-2">
                 Password
               </label>
               <input
@@ -58,11 +58,11 @@ defmodule HabitTrackerWeb.UserLive.Registration do
                 value={@form[:password].value}
                 autocomplete="new-password"
                 required
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
                 placeholder="••••••••"
                 style="font-size: 16px;"
               />
-              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <p class="mt-2 text-xs text-gray-500">
                 Must be at least 8 characters long
               </p>
             </div>
@@ -80,39 +80,39 @@ defmodule HabitTrackerWeb.UserLive.Registration do
               <button
                 type="submit"
                 phx-disable-with="Creating account..."
-                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 transition-all transform hover:scale-105"
               >
                 Create account
               </button>
             </div>
 
-            <p class="text-xs text-center text-gray-500 dark:text-gray-400">
+            <p class="text-xs text-center text-gray-500">
               By creating an account, you agree to our Terms of Service and Privacy Policy
             </p>
           </.form>
         </div>
 
         <%!-- Features --%>
-        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+        <div class="bg-white/80 backdrop-blur-lg shadow-xl rounded-3xl p-6 border border-gray-100">
+          <h3 class="text-sm font-bold text-gray-900 mb-4">
             What you'll get:
           </h3>
           <ul class="space-y-3">
             <li class="flex items-start">
-              <.icon name="hero-check-circle" class="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">Track unlimited habits</span>
+              <.icon name="hero-check-circle" class="h-5 w-5 text-emerald-500 mr-3 flex-shrink-0 mt-0.5" />
+              <span class="text-sm text-gray-600">Track unlimited habits</span>
             </li>
             <li class="flex items-start">
-              <.icon name="hero-check-circle" class="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">View your progress and streaks</span>
+              <.icon name="hero-check-circle" class="h-5 w-5 text-emerald-500 mr-3 flex-shrink-0 mt-0.5" />
+              <span class="text-sm text-gray-600">View your progress and streaks</span>
             </li>
             <li class="flex items-start">
-              <.icon name="hero-check-circle" class="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">Daily email reminders</span>
+              <.icon name="hero-check-circle" class="h-5 w-5 text-emerald-500 mr-3 flex-shrink-0 mt-0.5" />
+              <span class="text-sm text-gray-600">Daily email reminders</span>
             </li>
             <li class="flex items-start">
-              <.icon name="hero-check-circle" class="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">Customizable themes and settings</span>
+              <.icon name="hero-check-circle" class="h-5 w-5 text-emerald-500 mr-3 flex-shrink-0 mt-0.5" />
+              <span class="text-sm text-gray-600">Customizable themes and settings</span>
             </li>
           </ul>
         </div>

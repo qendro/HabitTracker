@@ -124,7 +124,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
         <div class="mb-6">
           <.link
             navigate={~p"/admin/users"}
-            class="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <.icon name="hero-arrow-left" class="w-4 h-4 mr-2" />
             Back to users
@@ -134,23 +134,23 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
         <%!-- User Header --%>
         <div class="mb-8">
           <div class="flex items-center gap-4">
-            <div class="h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-              <.icon name="hero-user" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+            <div class="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
+              <.icon name="hero-user" class="h-8 w-8 text-indigo-600" />
             </div>
             <div class="flex-1">
-              <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 class="text-3xl font-bold text-gray-900">
                 <%= @user.email %>
               </h1>
-              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p class="mt-1 text-sm text-gray-500">
                 User ID: <%= @user.id %>
               </p>
             </div>
             <%= if @user.deleted_at do %>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                 Deactivated
               </span>
             <% else %>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                 Active
               </span>
             <% end %>
@@ -159,7 +159,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
 
         <%!-- User Summary --%>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
             <div class="p-5">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -167,10 +167,10 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                    <dt class="text-sm font-medium text-gray-500 truncate">
                       Joined
                     </dt>
-                    <dd class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <dd class="text-lg font-semibold text-gray-900">
                       <%= format_date(@user.inserted_at) %>
                     </dd>
                   </dl>
@@ -179,7 +179,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
             </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
             <div class="p-5">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -187,10 +187,10 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                    <dt class="text-sm font-medium text-gray-500 truncate">
                       Habits
                     </dt>
-                    <dd class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <dd class="text-lg font-semibold text-gray-900">
                       <%= @user_summary.habit_count %>
                     </dd>
                   </dl>
@@ -199,7 +199,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
             </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
             <div class="p-5">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -207,10 +207,10 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                    <dt class="text-sm font-medium text-gray-500 truncate">
                       Logs
                     </dt>
-                    <dd class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <dd class="text-lg font-semibold text-gray-900">
                       <%= @user_summary.log_count %>
                     </dd>
                   </dl>
@@ -219,7 +219,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
             </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
+          <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
             <div class="p-5">
               <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -227,10 +227,10 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                    <dt class="text-sm font-medium text-gray-500 truncate">
                       Timezone
                     </dt>
-                    <dd class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <dd class="text-sm font-semibold text-gray-900">
                       <%= @user.timezone %>
                     </dd>
                   </dl>
@@ -241,9 +241,9 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
         </div>
 
         <%!-- Actions --%>
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="bg-white shadow rounded-lg border border-gray-200">
           <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 mb-4">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">
               Admin Actions
             </h3>
 
@@ -251,16 +251,16 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
               <%!-- View as User --%>
               <div class="flex items-center justify-between">
                 <div>
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <h4 class="text-sm font-medium text-gray-900">
                     View as User
                   </h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="text-sm text-gray-500">
                     View the user's dashboard in read-only mode
                   </p>
                 </div>
                 <button
                   phx-click="view_as_user"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   <.icon name="hero-eye" class="w-4 h-4 mr-2" />
                   View Dashboard
@@ -268,12 +268,12 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
               </div>
 
               <%!-- Toggle Active Status --%>
-              <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div class="flex items-center justify-between border-t border-gray-200 pt-4">
                 <div>
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <h4 class="text-sm font-medium text-gray-900">
                     <%= if @user.deleted_at, do: "Reactivate Account", else: "Deactivate Account" %>
                   </h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="text-sm text-gray-500">
                     <%= if @user.deleted_at do %>
                       Restore access to this user account
                     <% else %>
@@ -287,9 +287,9 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
                     "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
                     if(@user.deleted_at,
                       do:
-                        "border-green-300 dark:border-green-600 text-green-700 dark:text-green-300 bg-white dark:bg-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 focus:ring-green-500",
+                        "border-green-300 text-green-700 bg-white hover:bg-green-50 focus:ring-green-500",
                       else:
-                        "border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 bg-white dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 focus:ring-yellow-500"
+                        "border-yellow-300 text-yellow-700 bg-white hover:bg-yellow-50 focus:ring-yellow-500"
                     )
                   ]}
                 >
@@ -304,18 +304,18 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
               </div>
 
               <%!-- Force Password Reset --%>
-              <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div class="flex items-center justify-between border-t border-gray-200 pt-4">
                 <div>
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <h4 class="text-sm font-medium text-gray-900">
                     Force Password Reset
                   </h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="text-sm text-gray-500">
                     Invalidate all tokens and send password reset email
                   </p>
                 </div>
                 <button
                   phx-click="force_password_reset"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   <.icon name="hero-key" class="w-4 h-4 mr-2" />
                   Reset Password
@@ -323,18 +323,18 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
               </div>
 
               <%!-- Delete Account --%>
-              <div class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div class="flex items-center justify-between border-t border-gray-200 pt-4">
                 <div>
-                  <h4 class="text-sm font-medium text-red-900 dark:text-red-300">
+                  <h4 class="text-sm font-medium text-red-900">
                     Delete Account
                   </h4>
-                  <p class="text-sm text-red-600 dark:text-red-400">
+                  <p class="text-sm text-red-600">
                     Permanently delete this user account and all associated data
                   </p>
                 </div>
                 <button
                   phx-click="show_delete_modal"
-                  class="inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-600 text-sm font-medium rounded-md text-red-700 dark:text-red-300 bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  class="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
                   <.icon name="hero-trash" class="w-4 h-4 mr-2" />
                   Delete
@@ -352,27 +352,27 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" />
 
             <div
-              class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
               phx-click={JS.exec("phx-click", to: "#cancel-delete")}
             >
-              <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
-                  <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 sm:mx-0 sm:h-10 sm:w-10">
-                    <.icon name="hero-exclamation-triangle" class="h-6 w-6 text-red-600 dark:text-red-400" />
+                  <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <.icon name="hero-exclamation-triangle" class="h-6 w-6 text-red-600" />
                   </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
                       Delete User Account
                     </h3>
                     <div class="mt-2">
-                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                      <p class="text-sm text-gray-500">
                         Are you sure you want to delete this user account? This action will soft-delete the account immediately. All data will be permanently removed after 30 days. This action cannot be undone.
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
                   phx-click="confirm_delete"
@@ -384,7 +384,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
                   type="button"
                   id="cancel-delete"
                   phx-click="hide_delete_modal"
-                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Cancel
                 </button>

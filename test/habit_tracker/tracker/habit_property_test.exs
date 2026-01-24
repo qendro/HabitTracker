@@ -82,7 +82,7 @@ defmodule HabitTracker.Tracker.HabitPropertyTest do
       assert :ok = Tracker.reorder_habits(user, Enum.map(new_order, & &1.id))
 
       positions =
-        Tracker.list_active_habits(user)
+        Tracker.list_habits(user)
         |> Map.new(&{&1.id, &1.position})
 
       Enum.with_index(new_order, fn habit, index ->

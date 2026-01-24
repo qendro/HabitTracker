@@ -41,15 +41,15 @@ defmodule HabitTrackerWeb.AdminLive.Home do
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8 flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 class="text-3xl font-bold text-gray-900">
               Admin Dashboard
             </h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-2 text-sm text-gray-600">
               System metrics and analytics
             </p>
           </div>
           <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500 dark:text-gray-400">
+            <span class="text-sm text-gray-500">
               Last updated: <%= format_time(@last_updated) %>
             </span>
             <button
@@ -129,13 +129,13 @@ defmodule HabitTrackerWeb.AdminLive.Home do
           />
         </div>
 
-        <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex">
             <div class="flex-shrink-0">
               <.icon name="hero-information-circle" class="h-5 w-5 text-blue-400" />
             </div>
             <div class="ml-3">
-              <p class="text-sm text-blue-700 dark:text-blue-300">
+              <p class="text-sm text-blue-700">
                 Metrics are automatically refreshed every 60 seconds. Click the refresh button to update manually.
               </p>
             </div>
@@ -148,7 +148,7 @@ defmodule HabitTrackerWeb.AdminLive.Home do
 
   defp metric_card(assigns) do
     ~H"""
-    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
       <div class="p-5">
         <div class="flex items-center">
           <div class={"flex-shrink-0 rounded-md p-3 #{metric_color_class(@color)}"}>
@@ -156,11 +156,11 @@ defmodule HabitTrackerWeb.AdminLive.Home do
           </div>
           <div class="ml-5 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+              <dt class="text-sm font-medium text-gray-500 truncate">
                 <%= @title %>
               </dt>
               <dd class="flex items-baseline">
-                <div class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <div class="text-2xl font-semibold text-gray-900">
                   <%= @value %>
                 </div>
               </dd>

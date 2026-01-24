@@ -4,22 +4,22 @@ defmodule HabitTrackerWeb.UserLive.Login do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 py-12">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full space-y-8">
         <%!-- Logo/Header --%>
         <div class="text-center">
-          <div class="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4">
-            <span class="text-3xl">✅</span>
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+            <span class="text-white text-3xl font-bold">H</span>
           </div>
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-3">
             Welcome back
           </h2>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-base text-gray-600">
             <%= if @current_scope do %>
               You need to reauthenticate to perform sensitive actions on your account.
             <% else %>
               Don't have an account?
-              <.link navigate={~p"/users/register"} class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+              <.link navigate={~p"/users/register"} class="font-semibold text-blue-600 hover:text-cyan-600 transition-colors">
                 Sign up for free
               </.link>
             <% end %>
@@ -27,10 +27,10 @@ defmodule HabitTrackerWeb.UserLive.Login do
         </div>
 
         <%!-- Dev Mail Adapter Notice --%>
-        <div :if={local_mail_adapter?()} class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div :if={local_mail_adapter?()} class="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex">
             <.icon name="hero-information-circle" class="h-5 w-5 text-blue-400 mr-3 flex-shrink-0" />
-            <div class="text-sm text-blue-700 dark:text-blue-300">
+            <div class="text-sm text-blue-700">
               <p class="font-medium">Development Mode</p>
               <p class="mt-1">
                 To see sent emails, visit <.link href="/dev/mailbox" class="underline font-medium">the mailbox page</.link>.
@@ -40,7 +40,7 @@ defmodule HabitTrackerWeb.UserLive.Login do
         </div>
 
         <%!-- Login Form --%>
-        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
+        <div class="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-8 border border-gray-100">
           <.form
             for={@form}
             id="login_form"
@@ -50,7 +50,7 @@ defmodule HabitTrackerWeb.UserLive.Login do
             class="space-y-6"
           >
             <div>
-              <label for="login_form_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="login_form_email" class="block text-sm font-semibold text-gray-900 mb-2">
                 Email address
               </label>
               <input
@@ -62,14 +62,14 @@ defmodule HabitTrackerWeb.UserLive.Login do
                 autocomplete="email"
                 required
                 phx-mounted={JS.focus()}
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
                 placeholder="you@example.com"
                 style="font-size: 16px;"
               />
             </div>
 
             <div>
-              <label for="login_form_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="login_form_password" class="block text-sm font-semibold text-gray-900 mb-2">
                 Password
               </label>
               <input
@@ -79,7 +79,7 @@ defmodule HabitTrackerWeb.UserLive.Login do
                 value={@form[:password].value}
                 autocomplete="current-password"
                 required
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
                 placeholder="••••••••"
                 style="font-size: 16px;"
               />
@@ -87,7 +87,7 @@ defmodule HabitTrackerWeb.UserLive.Login do
 
             <div class="flex items-center justify-between">
               <div class="text-sm">
-                <.link navigate={~p"/users/reset-password"} class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                <.link navigate={~p"/users/reset-password"} class="font-semibold text-blue-600 hover:text-cyan-600 transition-colors">
                   Forgot your password?
                 </.link>
               </div>
@@ -98,13 +98,13 @@ defmodule HabitTrackerWeb.UserLive.Login do
                 type="submit"
                 name={@form[:remember_me].name}
                 value="true"
-                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 transition-all transform hover:scale-105"
               >
                 Sign in and remember me
               </button>
               <button
                 type="submit"
-                class="w-full flex justify-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                class="w-full flex justify-center py-4 px-4 border-2 border-gray-200 rounded-xl shadow-md text-base font-semibold text-gray-900 bg-white hover:border-blue-600 transition-all"
               >
                 Sign in for this session only
               </button>

@@ -252,20 +252,53 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Mobile Bottom Navigation Bar - Solid & Professional */
+nav[aria-label="Mobile navigation"] {
+  /* Ensure completely solid background */
+  background-color: #ffffff;
+  /* Remove any transparency */
+  opacity: 1;
+  /* Strong shadow for depth */
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08), 0 -2px 4px rgba(0, 0, 0, 0.04);
+  /* Prevent content from showing through */
+  isolation: isolate;
+}
+
+[data-theme="dark"] nav[aria-label="Mobile navigation"] {
+  background-color: #1f2937;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Header - Auto-hide on scroll */
+header[aria-label="Mobile header"] {
+  background-color: #ffffff;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+header[aria-label="Mobile header"].header-hidden {
+  transform: translateY(-100%);
+}
+
+[data-theme="dark"] header[aria-label="Mobile header"] {
+  background-color: #1f2937;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* Navigation Styles */
 .nav-link {
   @apply flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium;
   @apply text-gray-700 dark:text-gray-300;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-700;
-  @apply hover:text-gray-900 dark:hover:text-white;
+  @apply hover:bg-blue-50 dark:hover:bg-blue-900/20;
+  @apply hover:text-blue-600 dark:hover:text-blue-400;
   @apply transition-all duration-200;
   min-height: 44px;
   touch-action: manipulation;
 }
 
 .nav-link-active {
-  @apply bg-indigo-50 dark:bg-indigo-900/20;
-  @apply text-indigo-600 dark:text-indigo-400;
+  @apply bg-blue-50 dark:bg-blue-900/20;
+  @apply text-blue-600 dark:text-blue-400;
   @apply font-semibold;
 }
 
@@ -277,21 +310,36 @@
 .mobile-nav-link {
   @apply flex flex-col items-center justify-center;
   @apply text-gray-600 dark:text-gray-400;
-  @apply hover:text-gray-900 dark:hover:text-white;
+  @apply hover:text-blue-600 dark:hover:text-blue-400;
   @apply transition-colors duration-200;
   @apply py-2 px-4;
   min-width: 64px;
   min-height: 64px;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-nav-link-active {
-  @apply text-indigo-600 dark:text-indigo-400;
+  @apply text-blue-600 dark:text-blue-400;
   @apply font-semibold;
 }
 
 .mobile-nav-link:active {
   @apply scale-95;
+}
+
+/* iOS-specific mobile navigation fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Ensure solid background on iOS */
+  nav[aria-label="Mobile navigation"] {
+    background-color: #ffffff !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  
+  [data-theme="dark"] nav[aria-label="Mobile navigation"] {
+    background-color: #1f2937 !important;
+  }
 }
 
 /* iOS-specific fixes */
@@ -518,7 +566,7 @@ html {
 
 .summary-count {
   @apply text-5xl font-bold;
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400;
   @apply bg-clip-text text-transparent;
   line-height: var(--line-height-tight);
   position: relative;
@@ -577,9 +625,9 @@ html {
 
 .date-display {
   @apply flex-1 text-center px-4 py-3 rounded-xl;
-  @apply hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200;
+  @apply hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200;
   @apply text-xl font-bold;
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400;
   @apply bg-clip-text text-transparent;
   @apply shadow-sm;
   /* Ensure proper touch target */
@@ -591,8 +639,8 @@ html {
 .today-button {
   @apply inline-flex items-center gap-2 px-6 py-3 text-sm font-bold;
   @apply text-white;
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600;
-  @apply hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
+  @apply hover:opacity-90;
   @apply rounded-xl transition-all duration-200;
   @apply shadow-lg hover:shadow-2xl;
   /* Ensure proper touch target */
@@ -638,8 +686,8 @@ html {
 /* Button Enhancements */
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 px-6 py-3;
-  @apply bg-gradient-to-r from-indigo-600 to-purple-600;
-  @apply hover:from-indigo-700 hover:to-purple-700;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
+  @apply hover:opacity-90;
   @apply text-white font-semibold rounded-xl;
   @apply shadow-md hover:shadow-lg;
   @apply transition-all duration-200;
@@ -1076,7 +1124,7 @@ html {
   @apply fixed bottom-24 right-6 z-40;
   @apply w-16 h-16 rounded-full;
   @apply flex items-center justify-center;
-  @apply bg-gradient-to-r from-indigo-600 to-purple-600;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
   @apply text-white shadow-2xl;
   @apply transition-all;
   transition-duration: var(--duration-normal);
@@ -1085,7 +1133,7 @@ html {
 
 .fab:hover {
   transform: scale(1.1) rotate(90deg);
-  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
 }
 
 .fab:active {
@@ -1110,8 +1158,8 @@ html {
 
 .stat-value {
   @apply text-4xl font-extrabold mb-2;
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600;
-  @apply dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
+  @apply dark:from-blue-400 dark:to-cyan-400;
   @apply bg-clip-text text-transparent;
   animation: countUp 0.8s var(--ease-spring);
 }
@@ -1132,10 +1180,10 @@ html {
   @apply transition-all;
   transition-duration: var(--duration-slow);
   transition-timing-function: var(--ease-smooth);
-  background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
 @keyframes shimmer {
@@ -1271,8 +1319,8 @@ html {
 
 .nav-button-enhanced {
   @apply p-4 rounded-xl transition-all;
-  @apply text-indigo-600 dark:text-indigo-400;
-  @apply hover:bg-indigo-50 dark:hover:bg-indigo-900/20;
+  @apply text-blue-600 dark:text-blue-400;
+  @apply hover:bg-blue-50 dark:hover:bg-blue-900/20;
   transition-duration: var(--duration-normal);
   transition-timing-function: var(--ease-spring);
   min-width: 48px;
@@ -1281,7 +1329,7 @@ html {
 
 .nav-button-enhanced:hover {
   transform: translateY(-2px) scale(1.1);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .nav-button-enhanced:active {
@@ -1315,8 +1363,8 @@ html {
 
 .empty-state-title-enhanced {
   @apply text-4xl font-extrabold mb-4;
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600;
-  @apply dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
+  @apply dark:from-blue-400 dark:to-cyan-400;
   @apply bg-clip-text text-transparent;
 }
 
@@ -1370,7 +1418,7 @@ html {
 
 .filter-pill.active {
   @apply text-white;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
   @apply shadow-lg;
   transform: scale(1.05);
 }
@@ -1513,8 +1561,8 @@ html {
 
 /* Utility Classes */
 .text-gradient {
-  @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600;
-  @apply dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400;
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
+  @apply dark:from-blue-400 dark:to-cyan-400;
   @apply bg-clip-text text-transparent;
 }
 
@@ -1534,4 +1582,178 @@ html {
 
 .spring-bounce:active {
   transform: scale(0.95);
+}
+
+/* Animated Blob Background */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Shimmer Animation for Progress Bars */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+/* ============================================
+   CLEAN & PROFESSIONAL UI STYLES
+   ============================================ */
+
+/* Clean Habit Card */
+.habit-card-clean {
+  @apply bg-white rounded-xl shadow-sm p-5 mb-3;
+  @apply border border-gray-200;
+  @apply transition-shadow duration-200;
+}
+
+.habit-card-clean:hover {
+  @apply shadow-md;
+}
+
+/* Clean Icon */
+.habit-icon-clean {
+  @apply w-14 h-14 rounded-xl flex items-center justify-center text-3xl;
+  @apply transition-transform duration-200;
+  min-width: 56px;
+  min-height: 56px;
+}
+
+.habit-card-clean:hover .habit-icon-clean {
+  @apply scale-105;
+}
+
+/* Clean Toggle Button */
+.toggle-clean {
+  @apply w-12 h-12 rounded-full;
+  @apply flex items-center justify-center;
+  @apply transition-all duration-200;
+  @apply shadow-sm;
+  min-width: 48px;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.toggle-clean:hover {
+  @apply shadow-md scale-105;
+}
+
+.toggle-clean:active {
+  @apply scale-95;
+}
+
+.toggle-clean.complete {
+  @apply bg-green-500 text-white;
+}
+
+.toggle-clean.incomplete {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-400;
+}
+
+/* Clean Progress Bar */
+.progress-bar-clean {
+  @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-fill-clean {
+  @apply h-full rounded-full transition-all duration-300;
+}
+
+/* Clean Streak Badge */
+.streak-badge-clean {
+  @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium;
+  @apply bg-orange-100 text-orange-800;
+}
+
+/* Clean Completion Summary */
+.completion-summary-clean {
+  @apply flex items-center justify-between p-6;
+  @apply bg-white rounded-xl shadow-sm;
+  @apply border border-gray-200;
+}
+
+.summary-content {
+  @apply flex flex-col gap-1;
+}
+
+.summary-count {
+  @apply text-4xl font-bold text-gray-900;
+}
+
+.summary-label {
+  @apply text-sm text-gray-600 font-medium;
+}
+
+.summary-motivational {
+  @apply text-sm text-indigo-600 font-semibold mt-1;
+}
+
+/* Clean Date Navigator */
+.date-nav-clean {
+  @apply flex items-center justify-between gap-4 mb-6;
+  @apply p-4 bg-white rounded-xl shadow-sm;
+  @apply border border-gray-200;
+}
+
+.nav-button-clean {
+  @apply p-3 rounded-lg transition-all duration-200;
+  @apply text-indigo-600 hover:bg-indigo-50;
+  min-width: 48px;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.nav-button-clean:hover {
+  @apply shadow-sm;
+}
+
+.nav-button-clean:active {
+  @apply scale-95;
+}
+
+/* Clean Today Button */
+.today-button-clean {
+  @apply inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold;
+  @apply text-white bg-indigo-600 hover:bg-indigo-700;
+  @apply rounded-lg transition-all duration-200;
+  @apply shadow-sm hover:shadow-md;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.today-button-clean:active {
+  @apply scale-95;
+}
+
+/* Clean Empty State */
+.empty-state-clean {
+  @apply flex flex-col items-center justify-center py-16 px-6 text-center;
+  @apply bg-white rounded-xl border-2 border-dashed border-gray-300;
 }

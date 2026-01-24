@@ -228,8 +228,15 @@ defmodule HabitTrackerWeb.TodayLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 app-container app-background" id="today-container" phx-hook=".SwipeDetector">
-      <div class="max-w-4xl mx-auto px-4 py-8 relative z-10">
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-cyan-50/30 app-container" id="today-container" phx-hook=".SwipeDetector">
+      <%!-- Subtle animated background blobs --%>
+      <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl animate-blob"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-indigo-200/20 to-blue-200/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        <div class="absolute top-1/2 left-1/2 w-72 h-72 bg-gradient-to-br from-cyan-200/20 to-teal-200/20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div class="relative max-w-4xl mx-auto px-4 py-8">
         <%!-- Skip Navigation Link for Accessibility --%>
         <a href="#main-content" class="skip-nav">
           Skip to main content
@@ -250,16 +257,6 @@ defmodule HabitTrackerWeb.TodayLive do
           />
         </div>
 
-        <%!-- Celebration Canvas --%>
-        <canvas
-          id="celebration-canvas"
-          phx-hook=".Confetti"
-          data-all-complete={@completion_summary.total > 0 && @completion_summary.completed == @completion_summary.total}
-          class="fixed inset-0 pointer-events-none"
-          style="z-index: 9999;"
-        >
-        </canvas>
-
         <%!-- Habit Cards --%>
         <div id="main-content" class="space-y-4" role="main" aria-label="Habit list">
           <%= for habit_with_progress <- @habits_with_progress do %>
@@ -274,23 +271,27 @@ defmodule HabitTrackerWeb.TodayLive do
             />
           <% end %>
 
-          <div :if={@habits_with_progress == []} class="empty-state-enhanced">
-            <svg class="empty-state-icon-enhanced text-indigo-300 dark:text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            <h2 class="empty-state-title-enhanced">No habits scheduled for this day</h2>
-            <p class="empty-state-description-enhanced">
-              Start building better routines by creating your first habit. Track daily activities, set goals, and watch your progress grow!
-            </p>
-            <.link
-              navigate={~p"/app/habits/new"}
-              class="btn-primary spring-bounce"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-              </svg>
-              Create Your First Habit
-            </.link>
+          <div :if={@habits_with_progress == []} class="relative bg-white rounded-2xl shadow-sm border-2 border-dashed border-gray-200 p-16 text-center">
+            <div class="flex flex-col items-center">
+              <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">No habits scheduled for this day</h2>
+              <p class="text-gray-600 mb-8 max-w-md">
+                Start building better routines by creating your first habit.
+              </p>
+              <.link
+                navigate={~p"/app/habits/new"}
+                class="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Create Your First Habit
+              </.link>
+            </div>
           </div>
         </div>
       </div>
@@ -302,7 +303,7 @@ defmodule HabitTrackerWeb.TodayLive do
         mounted() {
           let touchStartX = 0;
           let touchEndX = 0;
-          const swipeThreshold = 50; // 50px threshold
+          const swipeThreshold = 50;
 
           this.el.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
@@ -318,111 +319,12 @@ defmodule HabitTrackerWeb.TodayLive do
             
             if (Math.abs(swipeDistance) >= swipeThreshold) {
               if (swipeDistance > 0) {
-                // Swipe right - previous day
                 this.pushEvent("swipe_right", {});
               } else {
-                // Swipe left - next day
                 this.pushEvent("swipe_left", {});
               }
             }
           };
-        }
-      }
-    </script>
-
-    <%!-- Confetti JavaScript Hook --%>
-    <script :type={Phoenix.LiveView.ColocatedHook} name=".Confetti">
-      export default {
-        mounted() {
-          this.canvas = this.el;
-          this.ctx = this.canvas.getContext('2d');
-          this.confettiParticles = [];
-          this.animationFrame = null;
-          this.hasTriggered = false;
-
-          // Set canvas size
-          this.resizeCanvas();
-          window.addEventListener('resize', () => this.resizeCanvas());
-
-          // Check if we should trigger confetti on mount
-          this.checkAndTrigger();
-        },
-
-        updated() {
-          this.checkAndTrigger();
-        },
-
-        checkAndTrigger() {
-          const allComplete = this.el.dataset.allComplete === 'true';
-          
-          if (allComplete && !this.hasTriggered) {
-            this.hasTriggered = true;
-            this.triggerConfetti();
-          } else if (!allComplete) {
-            this.hasTriggered = false;
-          }
-        },
-
-        resizeCanvas() {
-          this.canvas.width = window.innerWidth;
-          this.canvas.height = window.innerHeight;
-        },
-
-        triggerConfetti() {
-          // Create confetti particles
-          const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-          const particleCount = 150;
-
-          for (let i = 0; i < particleCount; i++) {
-            this.confettiParticles.push({
-              x: Math.random() * this.canvas.width,
-              y: -10,
-              vx: (Math.random() - 0.5) * 4,
-              vy: Math.random() * 3 + 2,
-              rotation: Math.random() * 360,
-              rotationSpeed: (Math.random() - 0.5) * 10,
-              color: colors[Math.floor(Math.random() * colors.length)],
-              size: Math.random() * 8 + 4,
-              gravity: 0.15
-            });
-          }
-
-          this.animate();
-        },
-
-        animate() {
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-          // Update and draw particles
-          this.confettiParticles = this.confettiParticles.filter(particle => {
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-            particle.vy += particle.gravity;
-            particle.rotation += particle.rotationSpeed;
-
-            // Draw particle
-            this.ctx.save();
-            this.ctx.translate(particle.x, particle.y);
-            this.ctx.rotate((particle.rotation * Math.PI) / 180);
-            this.ctx.fillStyle = particle.color;
-            this.ctx.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size);
-            this.ctx.restore();
-
-            // Keep particle if still visible
-            return particle.y < this.canvas.height + 10;
-          });
-
-          // Continue animation if particles remain
-          if (this.confettiParticles.length > 0) {
-            this.animationFrame = requestAnimationFrame(() => this.animate());
-          }
-        },
-
-        destroyed() {
-          if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-          }
-          window.removeEventListener('resize', () => this.resizeCanvas());
         }
       }
     </script>

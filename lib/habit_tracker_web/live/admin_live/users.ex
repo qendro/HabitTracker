@@ -37,10 +37,10 @@ defmodule HabitTrackerWeb.AdminLive.Users do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 class="text-3xl font-bold text-gray-900">
             User Management
           </h1>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-2 text-sm text-gray-600">
             Search and manage user accounts
           </p>
         </div>
@@ -55,7 +55,7 @@ defmodule HabitTrackerWeb.AdminLive.Users do
                   name="search[query]"
                   value={@search_query}
                   placeholder="Search by email or user ID..."
-                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   phx-debounce="300"
                 />
               </div>
@@ -63,7 +63,7 @@ defmodule HabitTrackerWeb.AdminLive.Users do
                 <button
                   type="button"
                   phx-click="clear_search"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Clear
                 </button>
@@ -76,10 +76,10 @@ defmodule HabitTrackerWeb.AdminLive.Users do
         <%= if @search_query == "" do %>
           <div class="text-center py-12">
             <.icon name="hero-magnifying-glass" class="mx-auto h-12 w-12 text-gray-400" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+            <h3 class="mt-2 text-sm font-medium text-gray-900">
               Search for users
             </h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-500">
               Enter an email address or user ID to find users
             </p>
           </div>
@@ -87,17 +87,17 @@ defmodule HabitTrackerWeb.AdminLive.Users do
           <%= if @users == [] do %>
             <div class="text-center py-12">
               <.icon name="hero-user-group" class="mx-auto h-12 w-12 text-gray-400" />
-              <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+              <h3 class="mt-2 text-sm font-medium text-gray-900">
                 No users found
               </h3>
-              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p class="mt-1 text-sm text-gray-500">
                 Try a different search query
               </p>
             </div>
           <% else %>
-            <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md border border-gray-200 dark:border-gray-700">
-              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                <li :for={user <- @users} class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+            <div class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
+              <ul class="divide-y divide-gray-200">
+                <li :for={user <- @users} class="hover:bg-gray-50">
                   <.link
                     navigate={~p"/admin/users/#{user.id}"}
                     class="block px-4 py-4 sm:px-6"
@@ -106,15 +106,15 @@ defmodule HabitTrackerWeb.AdminLive.Users do
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-3">
                           <div class="flex-shrink-0">
-                            <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                              <.icon name="hero-user" class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                            <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                              <.icon name="hero-user" class="h-6 w-6 text-indigo-600" />
                             </div>
                           </div>
                           <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            <p class="text-sm font-medium text-gray-900 truncate">
                               <%= user.email %>
                             </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <p class="text-sm text-gray-500">
                               ID: <%= user.id %> • Joined <%= format_date(user.inserted_at) %>
                             </p>
                           </div>
@@ -132,7 +132,7 @@ defmodule HabitTrackerWeb.AdminLive.Users do
               </ul>
             </div>
 
-            <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            <div class="mt-4 text-sm text-gray-500">
               Found <%= length(@users) %> user(s)
             </div>
           <% end %>
