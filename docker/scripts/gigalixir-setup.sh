@@ -14,7 +14,7 @@ if [ -z "$GIGALIXIR_EMAIL" ] || [ -z "$GIGALIXIR_API_KEY" ]; then
 fi
 
 # Configure .netrc for Gigalixir authentication
-mkdir -p ~/.netrc
+rm -rf ~/.netrc
 cat > ~/.netrc << EOF
 machine api.gigalixir.com
   login $GIGALIXIR_EMAIL
