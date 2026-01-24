@@ -1,9 +1,10 @@
 # Docker Compose for Gigalixir Deployment
 # Self-contained deployment environment
-version: '3.8'
+name: habbits-deploy
 
 services:
   gigalixir:
+    image: habbits-deploy:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.gigalixir

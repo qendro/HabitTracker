@@ -1,3 +1,7 @@
+# Docker Compose for Development
+# Self-contained development environment
+name: habbits
+
 services:
   # PostgreSQL Database
   # For custom configuration, copy .env.dev to .env and docker-compose will load it
@@ -18,6 +22,7 @@ services:
       retries: 5
 
   web:
+    image: habbits-web:dev
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev
@@ -46,6 +51,7 @@ services:
     tty: true
 
   test:
+    image: habbits-test:dev
     build:
       context: ..
       dockerfile: docker/Dockerfile.dev

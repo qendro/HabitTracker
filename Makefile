@@ -36,6 +36,9 @@ help:
 	@echo "  make gigalixir-admin    - Create admin account on Gigalixir"
 	@echo "  make gigalixir-logs     - View Gigalixir app logs"
 	@echo "  make gigalixir-status   - Check Gigalixir app status"
+	@echo "  make gigalixir-domain   - Setup custom domain"
+	@echo "  make gigalixir-domains  - List configured domains"
+	@echo "  make gigalixir-restart  - Restart app"
 	@echo "  make gigalixir-shell    - Open Gigalixir deployment shell"
 	@echo ""
 	@echo "Note: Gigalixir commands require .env.gigalixir file with credentials"
@@ -171,3 +174,26 @@ gigalixir-shell:
 		exit 1; \
 	fi
 	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash
+
+gigalixir-domain:
+	@echo "Setting up custom domain..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/setup-domain.sh
+
+gigalixir-domains:
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/list-domains.sh
+
+gigalixir-restart:
+	@echo "Restarting app..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/restart.sh
