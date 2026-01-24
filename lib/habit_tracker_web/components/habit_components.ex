@@ -29,13 +29,13 @@ defmodule HabitTrackerWeb.HabitComponents do
 
   def habit_card(assigns) do
     ~H"""
-    <div id={"habit-card-#{@habit.id}"} class="habit-card fade-in">
-      <div class="flex items-start justify-between">
-        <div class="flex items-start space-x-3 flex-1">
+    <div id={"habit-card-#{@habit.id}"} class="habit-card-glass">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-start space-x-4 flex-1 min-w-0">
           <%!-- Icon --%>
           <div
-            class="habit-icon"
-            style={"background-color: #{@habit.color}20; color: #{@habit.color}"}
+            class="habit-icon-enhanced"
+            style={"background: linear-gradient(135deg, #{@habit.color}20 0%, #{@habit.color}40 100%); color: #{@habit.color}; border: 2px solid #{@habit.color}30;"}
           >
             <%= @habit.icon %>
           </div>
@@ -45,52 +45,76 @@ defmodule HabitTrackerWeb.HabitComponents do
             <h3 class="habit-name">
               <%= @habit.name %>
             </h3>
-            <p :if={@habit.description} class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p :if={@habit.description} class="habit-description">
               <%= @habit.description %>
             </p>
 
             <%!-- Progress --%>
-            <div class="mt-3">
+            <div class="mt-4">
               <%= case @progress.type do %>
                 <% :binary -> %>
                   <span class={[
-                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                    status_color(@progress.status)
+                    "badge",
+                    case @progress.status do
+                      :complete -> "badge-success"
+                      :planned -> "badge-info"
+                      :not_complete -> "badge-neutral"
+                    end
                   ]}>
+                    <%= case @progress.status do %>
+                      <% :complete -> %>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      <% :planned -> %>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                        </svg>
+                      <% :not_complete -> %>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    <% end %>
                     <%= status_label(@progress.status) %>
                   </span>
                 <% :numeric -> %>
-                  <div class="space-y-1">
-                    <div class="flex items-center justify-between text-sm">
-                      <span class="text-gray-600 dark:text-gray-400">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm font-medium">
+                      <span class="text-gray-700 dark:text-gray-300">
                         <%= @progress.current %> / <%= @progress.target %>
                         <%= if @progress.unit, do: @progress.unit %>
                       </span>
-                      <span class="font-medium text-gray-900 dark:text-white">
+                      <span class={[
+                        "font-bold",
+                        if(@progress.percentage >= 100, do: "text-green-600 dark:text-green-400", else: "text-indigo-600 dark:text-indigo-400")
+                      ]}>
                         <%= @progress.percentage %>%
                       </span>
                     </div>
-                    <div class="progress-bar">
+                    <div class="progress-bar-enhanced">
                       <div
-                        class="progress-fill"
+                        class="progress-fill-enhanced"
                         style={"width: #{min(@progress.percentage, 100)}%"}
                       >
                       </div>
                     </div>
                   </div>
                 <% :duration -> %>
-                  <div class="space-y-1">
-                    <div class="flex items-center justify-between text-sm">
-                      <span class="text-gray-600 dark:text-gray-400">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm font-medium">
+                      <span class="text-gray-700 dark:text-gray-300">
                         <%= @progress.current %> / <%= @progress.target %> <%= @progress.unit %>
                       </span>
-                      <span class="font-medium text-gray-900 dark:text-white">
+                      <span class={[
+                        "font-bold",
+                        if(@progress.percentage >= 100, do: "text-green-600 dark:text-green-400", else: "text-purple-600 dark:text-purple-400")
+                      ]}>
                         <%= @progress.percentage %>%
                       </span>
                     </div>
-                    <div class="progress-bar">
+                    <div class="progress-bar-enhanced">
                       <div
-                        class="h-full bg-purple-500 transition-all duration-300"
+                        class="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
                         style={"width: #{min(@progress.percentage, 100)}%"}
                       >
                       </div>
@@ -100,11 +124,11 @@ defmodule HabitTrackerWeb.HabitComponents do
             </div>
 
             <%!-- Streak Badge --%>
-            <div class="mt-3 flex items-center space-x-2">
-              <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
-                🔥 <%= @streak %> day streak
+            <div class="mt-4 flex items-center gap-2 flex-wrap">
+              <span class="streak-badge-enhanced">
+                <span class="relative z-10">🔥 <%= @streak %> day streak</span>
               </span>
-              <span :if={@is_future} class="text-xs text-gray-500 dark:text-gray-400">
+              <span :if={@is_future} class="text-xs text-gray-500 dark:text-gray-400 italic">
                 (as of today)
               </span>
             </div>
@@ -112,47 +136,42 @@ defmodule HabitTrackerWeb.HabitComponents do
         </div>
 
         <%!-- Action Buttons --%>
-        <div class="ml-4 flex flex-col space-y-2">
+        <div class="flex flex-col items-center gap-3">
           <%!-- Binary habit toggle button --%>
           <button
             :if={@habit.type == :binary && !@readonly}
             phx-click="toggle_habit"
             phx-value-habit-id={@habit.id}
             class={[
-              "touch-target rounded-full transition-all duration-200",
-              if(@is_complete,
-                do: "bg-green-500 hover:bg-green-600 text-white",
-                else: "bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-              )
+              "toggle-enhanced ripple",
+              if(@is_complete, do: "complete", else: "incomplete")
             ]}
             aria-label={if @is_complete, do: "Mark as incomplete", else: "Mark as complete"}
           >
-            <.icon
-              name={if @is_complete, do: "hero-check", else: "hero-check"}
-              class="w-6 h-6"
-            />
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
           </button>
 
           <%!-- Read-only indicator for binary habits --%>
           <div
             :if={@habit.type == :binary && @readonly}
             class={[
-              "touch-target rounded-full",
-              if(@is_complete,
-                do: "bg-green-500 text-white",
-                else: "bg-gray-200 dark:bg-gray-700"
-              )
+              "toggle-enhanced",
+              if(@is_complete, do: "complete", else: "incomplete")
             ]}
             aria-label="Read-only mode"
           >
-            <.icon name="hero-check" class="w-6 h-6" />
+            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
           </div>
 
           <%!-- Numeric/Duration habit input --%>
           <form
             :if={@habit.type in [:numeric, :duration] && !@readonly}
             phx-submit="log_value"
-            class="flex items-center space-x-2"
+            class="flex flex-col items-center gap-2"
           >
             <input
               type="number"
@@ -161,29 +180,31 @@ defmodule HabitTrackerWeb.HabitComponents do
               min="0"
               value={get_current_value(@log, @habit.type)}
               placeholder={get_placeholder(@habit.type, @habit.unit_label)}
-              class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-24 px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
               style="font-size: 16px;"
             />
             <input type="hidden" name="habit-id" value={@habit.id} />
             <button
               type="submit"
-              class="touch-target rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+              class="toggle-enhanced bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white ripple"
               aria-label="Log value"
             >
-              <.icon name="hero-check" class="w-5 h-5" />
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
             </button>
           </form>
 
           <%!-- Read-only display for numeric/duration habits --%>
           <div
             :if={@habit.type in [:numeric, :duration] && @readonly}
-            class="flex items-center space-x-2"
+            class="flex flex-col items-center gap-2"
           >
             <input
               type="number"
               value={get_current_value(@log, @habit.type)}
               disabled
-              class="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+              class="w-24 px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
               style="font-size: 16px;"
             />
           </div>
@@ -206,14 +227,21 @@ defmodule HabitTrackerWeb.HabitComponents do
   def completion_summary(assigns) do
     assigns = assign(assigns, :percentage, calculate_percentage(assigns.completed, assigns.total))
     assigns = assign(assigns, :all_complete, assigns.completed == assigns.total && assigns.total > 0)
+    assigns = assign(assigns, :motivational_message, get_motivational_message(assigns.completed, assigns.total))
 
     ~H"""
-    <div class="completion-summary">
-      <div class="summary-content">
-        <span class="summary-count">
+    <div class={[
+      "completion-summary-enhanced",
+      if(@all_complete, do: "all-complete", else: "")
+    ]}>
+      <div class="summary-content relative z-10">
+        <span class="summary-count animated-counter">
           <%= @completed %> / <%= @total %>
         </span>
-        <span class="summary-label">complete</span>
+        <span class="summary-label">habits complete</span>
+        <p :if={@motivational_message} class="summary-motivational">
+          <%= @motivational_message %>
+        </p>
       </div>
 
       <%= if @all_complete do %>
@@ -222,8 +250,8 @@ defmodule HabitTrackerWeb.HabitComponents do
         </div>
       <% end %>
 
-      <div class="relative w-20 h-20">
-        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+      <div class="relative w-28 h-28">
+        <svg class="w-full h-full transform -rotate-90 progress-ring" viewBox="0 0 100 100">
           <%!-- Background circle --%>
           <circle
             cx="50"
@@ -234,22 +262,29 @@ defmodule HabitTrackerWeb.HabitComponents do
             fill="none"
             class="text-gray-200 dark:text-gray-700"
           />
-          <%!-- Progress circle --%>
+          <%!-- Progress circle with gradient --%>
+          <defs>
+            <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+            </linearGradient>
+          </defs>
           <circle
             cx="50"
             cy="50"
             r="40"
-            stroke="currentColor"
+            stroke="url(#progress-gradient)"
             stroke-width="8"
             fill="none"
-            class="text-indigo-500 transition-all duration-500"
+            class="transition-all duration-500"
             stroke-dasharray={circumference()}
             stroke-dashoffset={circumference() * (1 - @percentage / 100)}
             stroke-linecap="round"
           />
         </svg>
         <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-lg font-bold text-gray-900 dark:text-white">
+          <span class="text-2xl font-extrabold text-gray-900 dark:text-white animated-counter">
             <%= round(@percentage) %>%
           </span>
         </div>
@@ -275,31 +310,33 @@ defmodule HabitTrackerWeb.HabitComponents do
 
   def date_navigator(assigns) do
     ~H"""
-    <div class="date-navigator">
+    <div class="date-nav-enhanced">
       <button
         phx-click="prev_day"
-        class="nav-button"
+        class="nav-button-enhanced"
         aria-label="Previous day"
       >
-        <.icon name="hero-chevron-left" class="w-6 h-6" />
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
       </button>
 
       <div class="flex-1 text-center">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-4xl font-extrabold text-gradient mb-2">
           <%= format_date(@selected_date, @is_today) %>
         </h1>
-        <p :if={!@is_today} class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 font-medium">
           <%= Calendar.strftime(@selected_date, "%A, %B %d, %Y") %>
         </p>
         <%!-- Calendar Picker --%>
-        <div class="mt-2">
+        <div class="flex justify-center">
           <input
             type="date"
             id="date-picker"
             value={Date.to_iso8601(@selected_date)}
             phx-change="select_date"
             name="date"
-            class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="px-5 py-2.5 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-indigo-200 dark:focus:ring-indigo-900/30 focus:border-indigo-500 transition-all shadow-sm hover:shadow-md spring-bounce"
             style="font-size: 16px;"
           />
         </div>
@@ -307,19 +344,24 @@ defmodule HabitTrackerWeb.HabitComponents do
 
       <button
         phx-click="next_day"
-        class="nav-button"
+        class="nav-button-enhanced"
         aria-label="Next day"
       >
-        <.icon name="hero-chevron-right" class="w-6 h-6" />
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
     </div>
 
     <%!-- Back to Today Button --%>
-    <div :if={!@is_today} class="text-center mt-4">
+    <div :if={!@is_today} class="text-center mb-6">
       <button
         phx-click="back_to_today"
-        class="today-button"
+        class="today-button spring-bounce"
       >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clip-rule="evenodd" />
+        </svg>
         Back to Today
       </button>
     </div>
@@ -359,4 +401,28 @@ defmodule HabitTrackerWeb.HabitComponents do
   defp calculate_percentage(completed, total), do: completed / total * 100
 
   defp circumference, do: 2 * :math.pi() * 40
+
+  defp get_motivational_message(completed, total) when completed == total and total > 0 do
+    messages = [
+      "You're on fire! 🔥",
+      "Perfect day! ⭐",
+      "Crushing it! 💪",
+      "Amazing work! 🎯",
+      "Keep it up! 🚀"
+    ]
+    Enum.random(messages)
+  end
+
+  defp get_motivational_message(completed, total) when completed > 0 do
+    percentage = completed / total * 100
+    cond do
+      percentage >= 75 -> "Almost there! 💫"
+      percentage >= 50 -> "Great progress! 👏"
+      percentage >= 25 -> "Keep going! 💪"
+      true -> "You've got this! 🌟"
+    end
+  end
+
+  defp get_motivational_message(0, total) when total > 0, do: "Let's get started! 🎯"
+  defp get_motivational_message(_, _), do: nil
 end

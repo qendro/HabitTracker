@@ -1,6 +1,8 @@
 defmodule HabitTrackerWeb.HabitFormLive do
   use HabitTrackerWeb, :live_view
 
+  import HabitTrackerWeb.CoreComponents
+
   alias HabitTracker.Tracker
   alias HabitTracker.Tracker.Habit
 
@@ -22,7 +24,10 @@ defmodule HabitTrackerWeb.HabitFormLive do
   @emojis [
     "🏃", "💪", "📚", "💧", "🧘", "🎯", "✅", "⭐", "🔥", "💯",
     "🎨", "🎵", "🎮", "📝", "💼", "🏋️", "🚴", "🏊", "🧠", "❤️",
-    "🌟", "🎓", "🍎", "☕", "🌱", "🎪", "🎭", "🎬", "📱", "💻"
+    "🌟", "🎓", "🍎", "☕", "🌱", "🎪", "🎭", "🎬", "📱", "💻",
+    "🍕", "🍔", "🥗", "🥤", "🏠", "🚗", "✈️", "🎸", "📷", "🎮",
+    "⚽", "🏀", "🎾", "🏐", "🎯", "🎲", "🧩", "🎨", "🖼️", "📖",
+    "✏️", "🖊️", "📐", "🔬", "🔭", "💊", "🩺", "🧬", "🌍", "🌙"
   ]
 
   @impl true
@@ -39,11 +44,16 @@ defmodule HabitTrackerWeb.HabitFormLive do
           type: :binary,
           occurrence_schedule: %{"type" => "daily"},
           goal_horizon: :daily,
-          active: true
+          active: true,
+          icon: "⭐",
+          color: "#3B82F6"
         }, "New Habit"}
     end
     
-    changeset = Habit.changeset(habit, %{})
+    changeset = Habit.changeset(habit, %{
+      "type" => habit.type,
+      "goal_horizon" => habit.goal_horizon
+    })
     
     {:ok,
      socket
@@ -53,11 +63,18 @@ defmodule HabitTrackerWeb.HabitFormLive do
      |> assign(:page_title, page_title)
      |> assign(:colors, @colors)
      |> assign(:emojis, @emojis)
-     |> assign(:selected_weekdays, get_selected_weekdays(habit))}
+     |> assign(:selected_icon, habit.icon)
+     |> assign(:selected_color, habit.color)
+     |> assign(:selected_weekdays, get_selected_weekdays(habit))
+     |> assign(:show_advanced, false)
+     |> assign(:show_emoji_picker, false)
+     |> assign(:show_color_picker, false)}
   end
 
   @impl true
   def handle_event("validate", %{"habit" => habit_params}, socket) do
+    IO.inspect(habit_params, label: "VALIDATE PARAMS")
+    
     # Convert weekdays array to occurrence_schedule
     habit_params = process_habit_params(habit_params, socket.assigns.selected_weekdays)
     
@@ -66,7 +83,61 @@ defmodule HabitTrackerWeb.HabitFormLive do
       |> Habit.changeset(habit_params)
       |> Map.put(:action, :validate)
     
+    IO.inspect(changeset.changes, label: "CHANGESET CHANGES")
+    
     {:noreply, assign(socket, form: to_form(changeset))}
+  end
+
+  @impl true
+  def handle_event("select_color", %{"color" => color}, socket) do
+    {:noreply, 
+     socket
+     |> assign(:selected_color, color)
+     |> assign(:show_color_picker, false)}
+  end
+
+  @impl true
+  def handle_event("select_emoji", %{"emoji" => emoji}, socket) do
+    {:noreply, 
+     socket
+     |> assign(:selected_icon, emoji)
+     |> assign(:show_emoji_picker, false)}
+  end
+
+  @impl true
+  def handle_event("select_type", %{"type" => type}, socket) do
+    type_atom = String.to_existing_atom(type)
+    
+    changeset =
+      socket.assigns.habit
+      |> Habit.changeset(%{"type" => type_atom})
+      |> Map.put(:action, :validate)
+    
+    {:noreply, assign(socket, form: to_form(changeset))}
+  end
+
+  @impl true
+  def handle_event("toggle_emoji_picker", _params, socket) do
+    {:noreply, 
+     socket
+     |> assign(:show_emoji_picker, !socket.assigns.show_emoji_picker)
+     |> assign(:show_color_picker, false)}
+  end
+
+  @impl true
+  def handle_event("toggle_color_picker", _params, socket) do
+    {:noreply, 
+     socket
+     |> assign(:show_color_picker, !socket.assigns.show_color_picker)
+     |> assign(:show_emoji_picker, false)}
+  end
+
+  @impl true
+  def handle_event("close_pickers", _params, socket) do
+    {:noreply, 
+     socket
+     |> assign(:show_emoji_picker, false)
+     |> assign(:show_color_picker, false)}
   end
 
   @impl true
@@ -84,9 +155,29 @@ defmodule HabitTrackerWeb.HabitFormLive do
   end
 
   @impl true
+  def handle_event("select_everyday", _params, socket) do
+    {:noreply, assign(socket, :selected_weekdays, [1, 2, 3, 4, 5, 6, 7])}
+  end
+
+  @impl true
+  def handle_event("select_weekdays", _params, socket) do
+    {:noreply, assign(socket, :selected_weekdays, [1, 2, 3, 4, 5])}
+  end
+
+  @impl true
+  def handle_event("toggle_advanced", _params, socket) do
+    {:noreply, assign(socket, :show_advanced, !socket.assigns.show_advanced)}
+  end
+
+  @impl true
   def handle_event("save", %{"habit" => habit_params}, socket) do
     # Convert weekdays array to occurrence_schedule
     habit_params = process_habit_params(habit_params, socket.assigns.selected_weekdays)
+    
+    # Add icon and color from assigns
+    habit_params = habit_params
+      |> Map.put("icon", socket.assigns.selected_icon)
+      |> Map.put("color", socket.assigns.selected_color)
     
     save_habit(socket, socket.assigns.mode, habit_params)
   end
@@ -153,284 +244,442 @@ defmodule HabitTrackerWeb.HabitFormLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+      <div class="max-w-3xl mx-auto px-4 py-8">
         <%!-- Header --%>
-        <div class="mb-6">
+        <div class="mb-8">
           <.link
             navigate={~p"/app/habits"}
-            class="text-blue-600 dark:text-blue-400 hover:underline mb-2 inline-block"
+            class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-all mb-4 spring-bounce hover-lift"
           >
-            ← Back to Habits
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Habits
           </.link>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 class="text-5xl font-extrabold text-gradient mb-3">
             <%= @page_title %>
           </h1>
+          <p class="text-lg text-gray-600 dark:text-gray-400">
+            <%= if @mode == :new, do: "Let's build a habit that sticks ✨", else: "Update your habit details" %>
+          </p>
         </div>
 
-        <%!-- Form --%>
-        <.form
-          for={@form}
-          id="habit-form"
-          phx-change="validate"
-          phx-submit="save"
-          class="space-y-6"
+        <%!-- Form Card --%>
+        <div class="glass-card p-10">
+          <.form
+            for={@form}
+            id="habit-form"
+            phx-change="validate"
+            phx-submit="save"
+            class="space-y-8"
+          >
+            <%!-- Essential Fields --%>
+            <div class="space-y-6">
+              <%!-- Form Errors --%>
+              <div :if={@form.errors != []} class="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
+                <p class="text-sm font-medium text-red-800 dark:text-red-400 mb-2">
+                  Please fix the following errors:
+                </p>
+                <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                  <%= for {field, errors} <- @form.errors do %>
+                    <%= for error <- List.wrap(errors) do %>
+                      <li><%= "#{field}: #{error}" %></li>
+                    <% end %>
+                  <% end %>
+                </ul>
+              </div>
+
+              <%!-- Name with Icon & Color Preview --%>
+              <div>
+                <label class="block text-sm font-bold text-gray-900 dark:text-white mb-4">
+                  What habit do you want to build?
+                </label>
+                <div class="flex items-start gap-4">
+                  <%!-- Icon & Color Preview Stack --%>
+                  <div class="flex flex-col gap-3">
+                    <%!-- Icon Preview Button --%>
+                    <button
+                      type="button"
+                      phx-click="toggle_emoji_picker"
+                      class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-lg hover:shadow-xl transition-all spring-bounce hover-lift"
+                      style={"background-color: #{@selected_color}"}
+                      title="Click to change icon"
+                    >
+                      <%= @selected_icon %>
+                    </button>
+                    
+                    <%!-- Color Swatch Button --%>
+                    <button
+                      type="button"
+                      phx-click="toggle_color_picker"
+                      class="w-20 h-10 rounded-xl shadow-lg hover:shadow-xl transition-all spring-bounce hover-lift border-2 border-white dark:border-gray-700"
+                      style={"background-color: #{@selected_color}"}
+                      title="Click to change color"
+                    >
+                    </button>
+                  </div>
+                  
+                  <%!-- Name Input --%>
+                  <div class="flex-1">
+                    <input
+                      type="text"
+                      name="habit[name]"
+                      id="habit-name"
+                      value={@form[:name].value}
+                      placeholder="e.g., Morning Exercise, Read 30 minutes, Drink Water"
+                      class="w-full px-5 py-4 text-lg border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 dark:focus:ring-indigo-900/30 dark:bg-gray-700 dark:text-white transition-all spring-bounce"
+                      required
+                    />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                      💡 Click the icon or color to customize
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <%!-- Habit Type (Compact & Clean) --%>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  How do you track it?
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    phx-click="select_type"
+                    phx-value-type="binary"
+                    class={[
+                      "relative flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all",
+                      if(@form[:type].value == :binary,
+                        do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
+                        else: "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                      )
+                    ]}
+                  >
+                    <div class="text-2xl mb-1">✓</div>
+                    <div class="font-medium text-gray-900 dark:text-white text-xs">Yes/No</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    phx-click="select_type"
+                    phx-value-type="numeric"
+                    class={[
+                      "relative flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all",
+                      if(@form[:type].value == :numeric,
+                        do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
+                        else: "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                      )
+                    ]}
+                  >
+                    <div class="text-2xl mb-1">#</div>
+                    <div class="font-medium text-gray-900 dark:text-white text-xs">Count</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    phx-click="select_type"
+                    phx-value-type="duration"
+                    class={[
+                      "relative flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all",
+                      if(@form[:type].value == :duration,
+                        do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
+                        else: "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                      )
+                    ]}
+                  >
+                    <div class="text-2xl mb-1">⏱</div>
+                    <div class="font-medium text-gray-900 dark:text-white text-xs">Time</div>
+                  </button>
+                </div>
+                <%!-- Hidden input to submit the type --%>
+                <input type="hidden" name="habit[type]" value={@form[:type].value} />
+              </div>
+
+              <%!-- Target Value (Inline for numeric/duration) --%>
+              <div :if={@form[:type].value in [:numeric, :duration]} class="flex gap-3">
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <%= if @form[:type].value == :duration, do: "Target (minutes)", else: "Target" %>
+                  </label>
+                  <input
+                    type="number"
+                    name="habit[target_value]"
+                    value={@form[:target_value].value}
+                    step={if @form[:type].value == :numeric, do: "0.01", else: "1"}
+                    min="0"
+                    placeholder={if @form[:type].value == :duration, do: "30", else: "8"}
+                    class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
+                <div :if={@form[:type].value == :numeric} class="flex-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Unit (optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="habit[unit_label]"
+                    value={@form[:unit_label].value}
+                    placeholder="glasses, pages, km"
+                    class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <%!-- Schedule (Clean with Quick Select) --%>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Which days?
+                </label>
+                
+                <%!-- Quick Select Buttons --%>
+                <div class="flex gap-2 mb-3">
+                  <button
+                    type="button"
+                    phx-click="select_everyday"
+                    class={[
+                      "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all",
+                      if(@selected_weekdays == [1, 2, 3, 4, 5, 6, 7],
+                        do: "bg-blue-500 text-white shadow-md",
+                        else: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      )
+                    ]}
+                  >
+                    Everyday
+                  </button>
+                  <button
+                    type="button"
+                    phx-click="select_weekdays"
+                    class={[
+                      "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all",
+                      if(@selected_weekdays == [1, 2, 3, 4, 5],
+                        do: "bg-blue-500 text-white shadow-md",
+                        else: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      )
+                    ]}
+                  >
+                    Weekdays
+                  </button>
+                </div>
+
+                <%!-- Individual Day Selection --%>
+                <div class="grid grid-cols-7 gap-1.5">
+                  <%= for {day_name, day_num} <- [{"M", 1}, {"T", 2}, {"W", 3}, {"T", 4}, {"F", 5}, {"S", 6}, {"S", 7}] do %>
+                    <button
+                      type="button"
+                      phx-click="toggle_weekday"
+                      phx-value-day={day_num}
+                      class={[
+                        "py-2.5 rounded-lg text-sm font-medium transition-all",
+                        if(day_num in @selected_weekdays,
+                          do: "bg-blue-500 text-white shadow-sm",
+                          else: "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        )
+                      ]}
+                    >
+                      <%= day_name %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+
+            <%!-- Advanced Options (Collapsible) --%>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <button
+                type="button"
+                phx-click="toggle_advanced"
+                class="flex items-center justify-between w-full text-left"
+              >
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Advanced Options
+                </span>
+                <svg
+                  class={[
+                    "w-5 h-5 text-gray-400 transition-transform",
+                    if(@show_advanced, do: "rotate-180", else: "")
+                  ]}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <div :if={@show_advanced} class="mt-4 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    name="habit[description]"
+                    rows="3"
+                    placeholder="Add any notes or details about this habit..."
+                    class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white resize-none"
+                  >{@form[:description].value}</textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Goal Horizon
+                    </label>
+                    <select
+                      name="habit[goal_horizon]"
+                      class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="daily" selected={@form[:goal_horizon].value == :daily}>
+                        Daily
+                      </option>
+                      <option value="weekly" selected={@form[:goal_horizon].value == :weekly}>
+                        Weekly
+                      </option>
+                      <option value="monthly" selected={@form[:goal_horizon].value == :monthly}>
+                        Monthly
+                      </option>
+                      <option value="yearly" selected={@form[:goal_horizon].value == :yearly}>
+                        Yearly
+                      </option>
+                    </select>
+                  </div>
+
+                  <div :if={@form[:goal_horizon].value != :daily}>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Times per <%= @form[:goal_horizon].value %>
+                    </label>
+                    <input
+                      type="number"
+                      name="habit[frequency_goal]"
+                      value={@form[:frequency_goal].value}
+                      min="1"
+                      class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <%!-- Action Buttons --%>
+            <div class="flex items-center justify-between pt-8 border-t border-gray-200 dark:border-gray-700">
+              <.link
+                navigate={~p"/app/habits"}
+                class="px-8 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all font-semibold spring-bounce"
+              >
+                Cancel
+              </.link>
+              <button
+                type="submit"
+                class="px-10 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all spring-bounce hover-lift text-lg"
+              >
+                <%= if @mode == :new, do: "✨ Create Habit", else: "💾 Save Changes" %>
+              </button>
+            </div>
+          </.form>
+        </div>
+
+        <%!-- Emoji Picker Modal --%>
+        <div
+          :if={@show_emoji_picker}
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          phx-click="close_pickers"
         >
-          <%!-- Name --%>
-          <div>
-            <.input
-              field={@form[:name]}
-              type="text"
-              label="Habit Name"
-              placeholder="e.g., Morning Exercise"
-              required
-            />
-          </div>
-
-          <%!-- Description --%>
-          <div>
-            <.input
-              field={@form[:description]}
-              type="textarea"
-              label="Description (optional)"
-              placeholder="Add details about this habit..."
-            />
-          </div>
-
-          <%!-- Icon Picker --%>
-          <div>
-            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              Icon
-            </label>
-            <div class="grid grid-cols-10 gap-2">
-              <%= for emoji <- @emojis do %>
-                <button
-                  type="button"
-                  phx-click={JS.exec("phx-click", to: "#icon-input", attr: ["data-emoji", emoji])}
-                  class={[
-                    "text-2xl p-2 rounded-lg border-2 transition-all hover:scale-110",
-                    if(@form[:icon].value == emoji,
-                      do: "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
-                      else: "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                    )
-                  ]}
-                >
-                  <%= emoji %>
-                </button>
-              <% end %>
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
+            <%!-- Modal Header --%>
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Choose an Icon
+              </h3>
+              <button
+                type="button"
+                phx-click="close_pickers"
+                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <input
-              type="hidden"
-              id="icon-input"
-              name="habit[icon]"
-              value={@form[:icon].value}
-              phx-click={JS.dispatch("change", to: "#habit-form")}
-              data-emoji=""
-            />
-            <script>
-              document.getElementById('icon-input').addEventListener('phx-click', function(e) {
-                const emoji = e.target.getAttribute('data-emoji');
-                if (emoji) {
-                  this.value = emoji;
-                  this.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-              });
-            </script>
-          </div>
-
-          <%!-- Color Picker --%>
-          <div>
-            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              Color
-            </label>
-            <div class="grid grid-cols-12 gap-2">
-              <%= for color <- @colors do %>
-                <button
-                  type="button"
-                  phx-click={JS.exec("phx-click", to: "#color-input", attr: ["data-color", color])}
-                  class={[
-                    "w-10 h-10 rounded-lg border-2 transition-all hover:scale-110",
-                    if(@form[:color].value == color,
-                      do: "border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-900 dark:ring-white",
-                      else: "border-gray-200 dark:border-gray-700"
-                    )
-                  ]}
-                  style={"background-color: #{color}"}
-                >
-                </button>
-              <% end %>
-            </div>
-            <input
-              type="hidden"
-              id="color-input"
-              name="habit[color]"
-              value={@form[:color].value}
-              phx-click={JS.dispatch("change", to: "#habit-form")}
-              data-color=""
-            />
-            <script>
-              document.getElementById('color-input').addEventListener('phx-click', function(e) {
-                const color = e.target.getAttribute('data-color');
-                if (color) {
-                  this.value = color;
-                  this.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-              });
-            </script>
-          </div>
-
-          <%!-- Habit Type --%>
-          <div>
-            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              Habit Type
-            </label>
-            <div class="space-y-2">
-              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <input
-                  type="radio"
-                  name="habit[type]"
-                  value="binary"
-                  checked={@form[:type].value == :binary}
-                  class="mr-3"
-                />
-                <div>
-                  <div class="font-medium text-gray-900 dark:text-white">Yes/No</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">
-                    Simple completion tracking (e.g., Did you exercise?)
-                  </div>
-                </div>
-              </label>
-
-              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <input
-                  type="radio"
-                  name="habit[type]"
-                  value="numeric"
-                  checked={@form[:type].value == :numeric}
-                  class="mr-3"
-                />
-                <div>
-                  <div class="font-medium text-gray-900 dark:text-white">Numeric</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">
-                    Track a measurable value (e.g., 8 glasses of water)
-                  </div>
-                </div>
-              </label>
-
-              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <input
-                  type="radio"
-                  name="habit[type]"
-                  value="duration"
-                  checked={@form[:type].value == :duration}
-                  class="mr-3"
-                />
-                <div>
-                  <div class="font-medium text-gray-900 dark:text-white">Duration</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">
-                    Track time spent (e.g., 30 minutes of meditation)
-                  </div>
-                </div>
-              </label>
+            
+            <%!-- Emoji Grid --%>
+            <div class="p-4 overflow-y-auto max-h-[60vh]">
+              <div class="grid grid-cols-6 gap-2">
+                <%= for emoji <- @emojis do %>
+                  <button
+                    type="button"
+                    phx-click="select_emoji"
+                    phx-value-emoji={emoji}
+                    class={[
+                      "w-12 h-12 rounded-lg text-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95",
+                      if(@selected_icon == emoji,
+                        do: "bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500 scale-105",
+                        else: "hover:bg-gray-100 dark:hover:bg-gray-700"
+                      )
+                    ]}
+                    title={emoji}
+                  >
+                    <%= emoji %>
+                  </button>
+                <% end %>
+              </div>
             </div>
           </div>
+        </div>
 
-          <%!-- Target Value (for numeric/duration) --%>
-          <div :if={@form[:type].value in [:numeric, :duration]}>
-            <.input
-              field={@form[:target_value]}
-              type="number"
-              label={if @form[:type].value == :duration, do: "Target (minutes)", else: "Target Value"}
-              step={if @form[:type].value == :numeric, do: "0.01", else: "1"}
-              min="0"
-              required
-            />
-          </div>
-
-          <%!-- Unit Label (for numeric) --%>
-          <div :if={@form[:type].value == :numeric}>
-            <.input
-              field={@form[:unit_label]}
-              type="text"
-              label="Unit Label (optional)"
-              placeholder="e.g., glasses, pages, km"
-            />
-          </div>
-
-          <%!-- Goal Horizon --%>
-          <div>
-            <.input
-              field={@form[:goal_horizon]}
-              type="select"
-              label="Goal Horizon"
-              options={[
-                {"Daily", "daily"},
-                {"Weekly", "weekly"},
-                {"Monthly", "monthly"},
-                {"Yearly", "yearly"}
-              ]}
-            />
-          </div>
-
-          <%!-- Frequency Goal (for non-daily) --%>
-          <div :if={@form[:goal_horizon].value != :daily}>
-            <.input
-              field={@form[:frequency_goal]}
-              type="number"
-              label={"Times per #{@form[:goal_horizon].value}"}
-              min="1"
-              required
-            />
-          </div>
-
-          <%!-- Occurrence Schedule --%>
-          <div>
-            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              Schedule
-            </label>
-            <div class="flex flex-wrap gap-2">
-              <%= for {day_name, day_num} <- [{"Mon", 1}, {"Tue", 2}, {"Wed", 3}, {"Thu", 4}, {"Fri", 5}, {"Sat", 6}, {"Sun", 7}] do %>
-                <button
-                  type="button"
-                  phx-click="toggle_weekday"
-                  phx-value-day={day_num}
-                  class={[
-                    "px-4 py-2 rounded-lg font-medium transition-colors",
-                    if(day_num in @selected_weekdays,
-                      do: "bg-blue-500 text-white",
-                      else: "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    )
-                  ]}
-                >
-                  <%= day_name %>
-                </button>
-              <% end %>
+        <%!-- Color Picker Modal --%>
+        <div
+          :if={@show_color_picker}
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          phx-click="close_pickers"
+        >
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full">
+            <%!-- Modal Header --%>
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Choose a Color
+              </h3>
+              <button
+                type="button"
+                phx-click="close_pickers"
+                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              <%= if @selected_weekdays == [1, 2, 3, 4, 5, 6, 7] do %>
-                Daily schedule
-              <% else %>
-                <%= length(@selected_weekdays) %> days per week
-              <% end %>
-            </p>
+            
+            <%!-- Color Grid --%>
+            <div class="p-6">
+              <div class="grid grid-cols-4 gap-3">
+                <%= for color <- @colors do %>
+                  <button
+                    type="button"
+                    phx-click="select_color"
+                    phx-value-color={color}
+                    class={[
+                      "w-16 h-16 rounded-xl transition-all hover:scale-110 active:scale-95 shadow-md hover:shadow-lg",
+                      if(@selected_color == color,
+                        do: "ring-4 ring-blue-500 dark:ring-blue-400 ring-offset-2 dark:ring-offset-gray-800 scale-105",
+                        else: ""
+                      )
+                    ]}
+                    style={"background-color: #{color}"}
+                    title={color}
+                  >
+                    <div :if={@selected_color == color} class="w-full h-full flex items-center justify-center">
+                      <svg class="w-8 h-8 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                  </button>
+                <% end %>
+              </div>
+            </div>
           </div>
-
-          <%!-- Submit Buttons --%>
-          <div class="flex items-center justify-end space-x-3 pt-4">
-            <.link
-              navigate={~p"/app/habits"}
-              class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              Cancel
-            </.link>
-            <button
-              type="submit"
-              class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
-            >
-              <%= if @mode == :new, do: "Create Habit", else: "Update Habit" %>
-            </button>
-          </div>
-        </.form>
+        </div>
       </div>
     </div>
     """

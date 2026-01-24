@@ -37,11 +37,35 @@ const TimezoneDetect = {
   },
 }
 
+const ThemeSync = {
+  mounted() {
+    this.handleEvent("theme-changed", ({theme}) => {
+      const setTheme = (theme) => {
+        if (theme === "system") {
+          localStorage.removeItem("phx:theme");
+          document.documentElement.removeAttribute("data-theme");
+          // Apply system preference
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (prefersDark) {
+            document.documentElement.setAttribute("data-theme", "dark");
+          } else {
+            document.documentElement.setAttribute("data-theme", "light");
+          }
+        } else {
+          localStorage.setItem("phx:theme", theme);
+          document.documentElement.setAttribute("data-theme", theme);
+        }
+      };
+      setTheme(theme);
+    });
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {TimezoneDetect}, // ...colocatedHooks removed temporarily
+  hooks: {TimezoneDetect, ThemeSync}, // ...colocatedHooks removed temporarily
 })
 
 // Show progress bar on live navigation and form submits
