@@ -115,7 +115,7 @@ gigalixir-setup:
 		echo "Copy .env.gigalixir.example and fill in your credentials"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/gigalixir-setup.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/gigalixir-setup.sh
 
 gigalixir-create:
 	@echo "Creating Gigalixir app and database..."
@@ -123,7 +123,7 @@ gigalixir-create:
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/create-app.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/create-app.sh
 
 gigalixir-deploy:
 	@echo "Deploying to Gigalixir..."
@@ -131,7 +131,7 @@ gigalixir-deploy:
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/deploy.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/deploy.sh
 
 gigalixir-migrate:
 	@echo "Running migrations on Gigalixir..."
@@ -139,7 +139,7 @@ gigalixir-migrate:
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/migrate.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/migrate.sh
 
 gigalixir-admin:
 	@echo "Creating admin account on Gigalixir..."
@@ -147,21 +147,21 @@ gigalixir-admin:
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/create-admin.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/create-admin.sh
 
 gigalixir-logs:
 	@if [ ! -f .env.gigalixir ]; then \
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/logs.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/logs.sh
 
 gigalixir-status:
 	@if [ ! -f .env.gigalixir ]; then \
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/status.sh
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/status.sh
 
 gigalixir-shell:
 	@echo "Opening Gigalixir deployment shell..."
@@ -170,4 +170,4 @@ gigalixir-shell:
 		echo "Error: .env.gigalixir file not found"; \
 		exit 1; \
 	fi
-	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash
