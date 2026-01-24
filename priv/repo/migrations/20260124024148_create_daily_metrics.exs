@@ -18,6 +18,5 @@ defmodule HabitTracker.Repo.Migrations.CreateDailyMetrics do
     end
 
     create unique_index(:daily_metrics, [:metric_date])
-    create index(:daily_metrics, [:metric_date])
   end
 end

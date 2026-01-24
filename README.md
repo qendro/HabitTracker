@@ -69,9 +69,9 @@ The application will be available at http://localhost:4000
 
 ## 📚 Documentation
 
-- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Complete development guide including setup, testing, deployment, and troubleshooting
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture, database schema, and design decisions
-- **[Spec Files](.kiro/specs/habit-tracker/)** - Detailed requirements, design, and implementation tasks
+- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Complete development and deployment guide
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
+- **[Docker README](docker/README.md)** - Docker setup details
 
 ## ⚙️ Configuration
 
@@ -155,18 +155,16 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for security details.
 
 **Common Commands:**
 ```bash
-make help           # See all commands
-make up             # Start services
-make test           # Run tests
-make create-admin   # Create admin account
+make help              # See all commands
+make up                # Start dev server
+make test              # Run tests
 make gigalixir-deploy  # Deploy to production
 ```
 
-**File Locations:**
-- Docker configs: `docker/`
-- Deployment scripts: `docker/scripts/`
-- Documentation: `docs/`
-- Gigalixir credentials: `.env.gigalixir` (gitignored)
+**Documentation:**
+- Development: `docs/DEVELOPMENT.md`
+- Architecture: `docs/ARCHITECTURE.md`
+- Docker: `docker/README.md`
 
 ## 📊 Project Status
 
