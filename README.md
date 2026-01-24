@@ -51,36 +51,21 @@ habit-tracker/
 
 ## 🚀 Quick Start
 
+**This project uses Docker exclusively - no local Elixir/Node.js installation required.**
+
 ### Using Docker (Recommended)
 
 ```bash
 # Start the application
-docker compose -f docker/docker-compose.yml up
+make up
 
 # In another terminal, create an admin account
-docker compose -f docker/docker-compose.yml exec web mix create_admin admin@example.com YourSecurePassword
+make create-admin
 ```
 
 The application will be available at http://localhost:4000
 
-**Note**: Docker Compose file is located at `docker/docker-compose.yml`. You can optionally copy `.env.dev` to `.env` to customize environment variables.
-
-### Without Docker
-
-```bash
-# Copy environment template
-cp .env.dev .env
-
-# Edit .env with your database settings
-
-# Install dependencies
-mix setup
-
-# Start the server
-mix phx.server
-```
-
-Visit http://localhost:4000
+**See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for deployment instructions.**
 
 ## 📚 Documentation
 
@@ -128,17 +113,23 @@ mix precommit
 
 ## 🚢 Deployment
 
-This application deploys to Gigalixir with automated deployment scripts:
+This application deploys to Gigalixir using Docker:
 
 ```bash
-# Deploy to staging
-./bin/deploy_staging.sh
+# First time setup
+make gigalixir-create
 
-# Deploy to production (with safety checks)
-./bin/deploy_production.sh
+# Deploy
+make gigalixir-deploy
+
+# Run migrations
+make gigalixir-migrate
+
+# Create admin
+make gigalixir-admin
 ```
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for complete deployment instructions.
+See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for complete deployment instructions.
 
 ## 🔒 Security
 
@@ -164,18 +155,18 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for security details.
 
 **Common Commands:**
 ```bash
-make setup          # Initial setup
+make help           # See all commands
 make up             # Start services
 make test           # Run tests
 make create-admin   # Create admin account
-make help           # See all commands
+make gigalixir-deploy  # Deploy to production
 ```
 
 **File Locations:**
 - Docker configs: `docker/`
+- Deployment scripts: `docker/scripts/`
 - Documentation: `docs/`
-- Helper scripts: `scripts/`
-- Deployment scripts: `bin/`
+- Gigalixir credentials: `.env.gigalixir` (gitignored)
 
 ## 📊 Project Status
 

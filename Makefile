@@ -1,39 +1,47 @@
-.PHONY: help up down restart logs shell iex test migrate rollback reset setup clean build deps precommit create-admin
+.PHONY: help up down restart logs shell iex test migrate rollback reset setup clean build deps precommit create-admin gigalixir-setup gigalixir-create gigalixir-deploy gigalixir-migrate gigalixir-admin gigalixir-logs gigalixir-status gigalixir-shell
 
-# Docker Compose command with proper file path
+# Docker Compose commands
 DC = docker compose -f docker/docker-compose.yml
+DC_GIGALIXIR = docker compose -f docker/docker-compose.gigalixir.yml
 
 # Default target
 help:
+	@echo "=========================================="
 	@echo "Habit Tracker - Docker Commands"
+	@echo "=========================================="
 	@echo ""
-	@echo "Setup & Control:"
-	@echo "  make setup      - Initial setup (start services, create DB, run migrations)"
-	@echo "  make up         - Start all services"
-	@echo "  make down       - Stop all services"
-	@echo "  make restart    - Restart all services"
-	@echo "  make build      - Rebuild containers"
-	@echo "  make clean      - Stop services and remove volumes (deletes data!)"
+	@echo "Development (Local):"
+	@echo "  make setup          - Initial setup (start services, create DB, run migrations)"
+	@echo "  make up             - Start all services"
+	@echo "  make down           - Stop all services"
+	@echo "  make restart        - Restart all services"
+	@echo "  make build          - Rebuild containers"
+	@echo "  make clean          - Stop services and remove volumes (deletes data!)"
+	@echo "  make logs           - View logs (follow mode)"
+	@echo "  make shell          - Open bash shell in web container"
+	@echo "  make iex            - Open IEx shell"
+	@echo "  make deps           - Install/update dependencies"
+	@echo "  make precommit      - Run precommit checks (compile, format, test)"
+	@echo "  make test           - Run all tests"
+	@echo "  make migrate        - Run database migrations"
+	@echo "  make rollback       - Rollback last migration"
+	@echo "  make reset          - Reset database (drop, create, migrate, seed)"
+	@echo "  make create-admin   - Create admin account (interactive)"
 	@echo ""
-	@echo "Development:"
-	@echo "  make logs       - View logs (follow mode)"
-	@echo "  make shell      - Open bash shell in web container"
-	@echo "  make iex        - Open IEx shell"
-	@echo "  make deps       - Install/update dependencies"
-	@echo "  make precommit  - Run precommit checks (compile, format, test)"
+	@echo "Gigalixir Deployment (Production):"
+	@echo "  make gigalixir-setup    - Test Gigalixir credentials"
+	@echo "  make gigalixir-create   - Create app and database on Gigalixir"
+	@echo "  make gigalixir-deploy   - Deploy to Gigalixir"
+	@echo "  make gigalixir-migrate  - Run migrations on Gigalixir"
+	@echo "  make gigalixir-admin    - Create admin account on Gigalixir"
+	@echo "  make gigalixir-logs     - View Gigalixir app logs"
+	@echo "  make gigalixir-status   - Check Gigalixir app status"
+	@echo "  make gigalixir-shell    - Open Gigalixir deployment shell"
 	@echo ""
-	@echo "Database:"
-	@echo "  make migrate    - Run database migrations"
-	@echo "  make rollback   - Rollback last migration"
-	@echo "  make reset      - Reset database (drop, create, migrate, seed)"
+	@echo "Note: Gigalixir commands require .env.gigalixir file with credentials"
 	@echo ""
-	@echo "Testing:"
-	@echo "  make test       - Run all tests"
-	@echo ""
-	@echo "Admin:"
-	@echo "  make create-admin - Create admin account (interactive)"
 
-# Setup & Control
+# Development - Setup & Control
 setup:
 	@echo "Starting services..."
 	$(DC) up -d
@@ -64,7 +72,7 @@ clean:
 		echo "Cleaned!"; \
 	fi
 
-# Development
+# Development - Tools
 logs:
 	$(DC) logs -f
 
@@ -81,7 +89,7 @@ deps:
 precommit:
 	$(DC) exec web mix precommit
 
-# Database
+# Development - Database
 migrate:
 	$(DC) exec web mix ecto.migrate
 
@@ -91,10 +99,75 @@ rollback:
 reset:
 	$(DC) exec web mix ecto.reset
 
-# Testing
+# Development - Testing
 test:
 	$(DC) run --rm test
 
-# Admin
+# Development - Admin
 create-admin:
 	@./scripts/create_admin.sh
+
+# Gigalixir Deployment
+gigalixir-setup:
+	@echo "Testing Gigalixir connection..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		echo "Copy .env.gigalixir.example and fill in your credentials"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/gigalixir-setup.sh
+
+gigalixir-create:
+	@echo "Creating Gigalixir app and database..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/create-app.sh
+
+gigalixir-deploy:
+	@echo "Deploying to Gigalixir..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/deploy.sh
+
+gigalixir-migrate:
+	@echo "Running migrations on Gigalixir..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/migrate.sh
+
+gigalixir-admin:
+	@echo "Creating admin account on Gigalixir..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/create-admin.sh
+
+gigalixir-logs:
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/logs.sh
+
+gigalixir-status:
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash /app/docker/scripts/status.sh
+
+gigalixir-shell:
+	@echo "Opening Gigalixir deployment shell..."
+	@echo "Run deployment scripts from /app/docker/scripts/"
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	$(DC_GIGALIXIR) run --rm --env-file .env.gigalixir gigalixir bash

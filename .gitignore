@@ -40,6 +40,7 @@ npm-debug.log
 .env.local
 .env.development
 .env.production.local
+.env.gigalixir
 docker/docker-compose.override.yml
 
 # IDE
