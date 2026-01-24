@@ -1,0 +1,425 @@
+/* See the Tailwind configuration guide for advanced usage
+   https://tailwindcss.com/docs/configuration */
+
+@import "tailwindcss" source(none);
+@source "../css";
+@source "../js";
+@source "../../lib/habit_tracker_web";
+
+/* A Tailwind plugin that makes "hero-#{ICON}" classes available.
+   The heroicons installation itself is managed by your mix.exs */
+@plugin "../vendor/heroicons";
+
+/* daisyUI Tailwind Plugin. You can update this file by fetching the latest version with:
+   curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.js
+   Make sure to look at the daisyUI changelog: https://daisyui.com/docs/changelog/ */
+@plugin "../vendor/daisyui" {
+  themes: false;
+}
+
+/* daisyUI theme plugin. You can update this file by fetching the latest version with:
+  curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js
+  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
+  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
+@plugin "../vendor/daisyui-theme" {
+  name: "dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(30.33% 0.016 252.42);
+  --color-base-200: oklch(25.26% 0.014 253.1);
+  --color-base-300: oklch(20.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: oklch(58% 0.233 277.117);
+  --color-primary-content: oklch(96% 0.018 272.314);
+  --color-secondary: oklch(58% 0.233 277.117);
+  --color-secondary-content: oklch(96% 0.018 272.314);
+  --color-accent: oklch(60% 0.25 292.717);
+  --color-accent-content: oklch(96% 0.016 293.756);
+  --color-neutral: oklch(37% 0.044 257.287);
+  --color-neutral-content: oklch(98% 0.003 247.858);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(60% 0.118 184.704);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "../vendor/daisyui-theme" {
+  name: "light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0 0);
+  --color-base-200: oklch(96% 0.001 286.375);
+  --color-base-300: oklch(92% 0.004 286.32);
+  --color-base-content: oklch(21% 0.006 285.885);
+  --color-primary: oklch(70% 0.213 47.604);
+  --color-primary-content: oklch(98% 0.016 73.684);
+  --color-secondary: oklch(55% 0.027 264.364);
+  --color-secondary-content: oklch(98% 0.002 247.839);
+  --color-accent: oklch(0% 0 0);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(44% 0.017 285.786);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(62% 0.214 259.815);
+  --color-info-content: oklch(97% 0.014 254.604);
+  --color-success: oklch(70% 0.14 182.503);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Add variants based on LiveView classes */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Use the data attribute for dark mode  */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+/* This file is for your main application CSS */
+
+/* Design Tokens and Theme Variables */
+:root {
+  /* Color Palette - Light Theme */
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+
+  /* Habit Colors (12 options) */
+  --habit-red: #ef4444;
+  --habit-orange: #f97316;
+  --habit-amber: #f59e0b;
+  --habit-yellow: #eab308;
+  --habit-lime: #84cc16;
+  --habit-green: #10b981;
+  --habit-teal: #14b8a6;
+  --habit-cyan: #06b6d4;
+  --habit-blue: #3b82f6;
+  --habit-indigo: #6366f1;
+  --habit-purple: #a855f7;
+  --habit-pink: #ec4899;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+
+  /* Spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --color-primary: #818cf8;
+  --color-primary-hover: #6366f1;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-background: #111827;
+  --color-surface: #1f2937;
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #9ca3af;
+  --color-border: #374151;
+}
+
+/* iOS Safe Area Support */
+.app-container {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* iOS-specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  body {
+    /* Prevent rubber band scrolling */
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+
+  #root, [data-phx-main] {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+  }
+}
+
+/* Touch Target Sizing (minimum 44x44px for iOS) */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  @apply flex items-center justify-center;
+}
+
+/* All buttons should meet touch target requirements */
+button, a, input[type="button"], input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Momentum Scrolling for iOS */
+.scrollable {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* Prevent zoom on input focus (16px font size minimum) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Disable tap highlight on iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Habit Card Component */
+.habit-card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-4;
+  @apply border border-gray-200 dark:border-gray-700;
+  @apply transition-all duration-200;
+  /* Ensure proper touch interaction */
+  touch-action: manipulation;
+}
+
+.habit-card:hover {
+  @apply shadow-lg;
+}
+
+.habit-card:active {
+  @apply scale-[0.98];
+}
+
+.habit-card-header {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.habit-icon {
+  @apply w-12 h-12 rounded-full flex items-center justify-center text-2xl;
+  /* Ensure icon is touchable */
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.habit-name {
+  @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.habit-streak {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.habit-toggle {
+  @apply w-16 h-16 rounded-full border-4 border-gray-300 dark:border-gray-600;
+  @apply flex items-center justify-center text-3xl;
+  @apply transition-all duration-200;
+  /* Ensure proper touch target */
+  min-width: 64px;
+  min-height: 64px;
+  touch-action: manipulation;
+}
+
+.habit-toggle:hover {
+  @apply scale-110;
+}
+
+.habit-toggle:active {
+  @apply scale-95;
+}
+
+.habit-toggle.complete {
+  @apply border-green-500 bg-green-50 dark:bg-green-900/20 text-green-600;
+}
+
+.progress-bar {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-gradient-to-r from-indigo-500 to-purple-500;
+  @apply transition-all duration-300;
+}
+
+/* Completion Summary Component */
+.completion-summary {
+  @apply relative flex items-center justify-between p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md;
+  @apply border border-gray-200 dark:border-gray-700;
+}
+
+.summary-content {
+  @apply flex flex-col;
+}
+
+.summary-count {
+  @apply text-3xl font-bold text-gray-900 dark:text-white;
+}
+
+.summary-label {
+  @apply text-sm text-gray-600 dark:text-gray-400 mt-1;
+}
+
+.celebration {
+  @apply absolute top-2 right-2 text-2xl animate-bounce;
+}
+
+/* Date Navigator Component */
+.date-navigator {
+  @apply flex items-center justify-between gap-4 mb-6;
+}
+
+.nav-button {
+  @apply p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors;
+  /* Ensure proper touch target */
+  min-width: 48px;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.nav-button:active {
+  @apply scale-95;
+}
+
+.date-display {
+  @apply flex-1 text-center px-4 py-2 rounded-lg;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors;
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+  /* Ensure proper touch target */
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.today-button {
+  @apply px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400;
+  @apply hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors;
+  /* Ensure proper touch target */
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* Accessibility - Focus Indicators */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-500;
+}
+
+/* Skip Navigation Link */
+.skip-nav {
+  @apply absolute -top-full left-0 bg-blue-600 text-white px-4 py-2 rounded;
+  @apply focus:top-0 z-50;
+}
+
+/* Loading States */
+.skeleton {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+/* Animation Utilities */
+.fade-in {
+  animation: fadeIn 200ms ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-up {
+  animation: slideUp 300ms ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <meta name="description" content="Track your habits and build better routines with HabitTracker" />
+    <.live_title default="HabitTracker" suffix=" · Phoenix Framework">
+      {assigns[:page_title]}
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
+    </script>
+    <script>
+      (() => {
+        const setTheme = (theme) => {
+          if (theme === "system") {
+            localStorage.removeItem("phx:theme");
+            document.documentElement.removeAttribute("data-theme");
+          } else {
+            localStorage.setItem("phx:theme", theme);
+            document.documentElement.setAttribute("data-theme", theme);
+          }
+        };
+        if (!document.documentElement.hasAttribute("data-theme")) {
+          setTheme(localStorage.getItem("phx:theme") || "system");
+        }
+        window.addEventListener("storage", (e) => e.key === "phx:theme" && setTheme(e.newValue || "system"));
+        
+        window.addEventListener("phx:set-theme", (e) => setTheme(e.target.dataset.phxTheme));
+      })();
+    </script>
+  </head>
+  <body>
+    <nav class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end" aria-label="User menu">
+      <%= if @current_scope do %>
+        <li>
+          <span aria-label="Current user email">{@current_scope.user.email}</span>
+        </li>
+        <li>
+          <.link href={~p"/users/settings"} aria-label="User settings">Settings</.link>
+        </li>
+        <li>
+          <.link href={~p"/users/log-out"} method="delete" aria-label="Log out">Log out</.link>
+        </li>
+      <% else %>
+        <li>
+          <.link href={~p"/users/register"} aria-label="Register new account">Register</.link>
+        </li>
+        <li>
+          <.link href={~p"/users/log-in"} aria-label="Log in to your account">Log in</.link>
+        </li>
+      <% end %>
+    </nav>
+    {@inner_content}
+  </body>
+</html>

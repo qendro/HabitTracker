@@ -1,0 +1,265 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Settings</h1>
+
+    <!-- Timezone Settings -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Timezone</h2>
+      <p class="text-gray-600 mb-4">
+        Your timezone affects how dates are calculated for habit tracking and streaks.
+      </p>
+
+      <.form
+        for={@timezone_form}
+        id="timezone-form"
+        phx-submit="update_timezone"
+        class="space-y-4"
+      >
+        <.input
+          field={@timezone_form[:timezone]}
+          type="select"
+          label="Select your timezone"
+          options={@timezones}
+          value={@user.timezone}
+        />
+
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Update Timezone
+          </button>
+        </div>
+      </.form>
+    </div>
+
+    <!-- Theme Settings -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Theme</h2>
+      <p class="text-gray-600 mb-4">
+        Choose your preferred color theme for the application.
+      </p>
+
+      <div class="space-y-3">
+        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+          <input
+            type="radio"
+            name="theme"
+            value="light"
+            checked={@theme == "light"}
+            phx-click="update_theme"
+            phx-value-theme="light"
+            class="mr-3"
+          />
+          <div>
+            <div class="font-medium">Light</div>
+            <div class="text-sm text-gray-600">Always use light theme</div>
+          </div>
+        </label>
+
+        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+          <input
+            type="radio"
+            name="theme"
+            value="dark"
+            checked={@theme == "dark"}
+            phx-click="update_theme"
+            phx-value-theme="dark"
+            class="mr-3"
+          />
+          <div>
+            <div class="font-medium">Dark</div>
+            <div class="text-sm text-gray-600">Always use dark theme</div>
+          </div>
+        </label>
+
+        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+          <input
+            type="radio"
+            name="theme"
+            value="system"
+            checked={@theme == "system"}
+            phx-click="update_theme"
+            phx-value-theme="system"
+            class="mr-3"
+          />
+          <div>
+            <div class="font-medium">System</div>
+            <div class="text-sm text-gray-600">Follow your device's theme preference</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Email Reminder Settings -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Email Reminders</h2>
+      <p class="text-gray-600 mb-4">
+        Get daily email reminders to help you stay on track with your habits.
+      </p>
+
+      <.form
+        for={@reminder_form}
+        id="reminder-form"
+        phx-submit="update_reminders"
+        phx-change="validate_reminders"
+        class="space-y-4"
+      >
+        <!-- Enable/Disable Toggle -->
+        <div class="flex items-center justify-between p-3 border rounded-lg">
+          <div>
+            <div class="font-medium">Enable Reminders</div>
+            <div class="text-sm text-gray-600">Receive daily email reminders</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              name="reminder_settings[enabled]"
+              value="true"
+              checked={@reminder_settings.enabled}
+              class="sr-only peer"
+            />
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+            </div>
+          </label>
+        </div>
+
+        <%= if @reminder_settings.enabled do %>
+          <!-- Time of Day -->
+          <.input
+            field={@reminder_form[:time_of_day]}
+            type="time"
+            label="Reminder Time"
+            help="Time in your local timezone"
+          />
+
+          <!-- Habit Selection -->
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700">
+              Which habits to remind
+            </label>
+
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+              <input
+                type="radio"
+                name="reminder_settings[habit_selection]"
+                value="all"
+                checked={@reminder_settings.habit_selection == "all"}
+                class="mr-3"
+              />
+              <div>
+                <div class="font-medium">All Active Habits</div>
+                <div class="text-sm text-gray-600">
+                  Remind me about all my active habits
+                </div>
+              </div>
+            </label>
+
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+              <input
+                type="radio"
+                name="reminder_settings[habit_selection]"
+                value="selected"
+                checked={@reminder_settings.habit_selection == "selected"}
+                class="mr-3"
+              />
+              <div>
+                <div class="font-medium">Specific Habits</div>
+                <div class="text-sm text-gray-600">Choose which habits to include</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Habit Multi-Select (shown when "selected" is chosen) -->
+          <%= if @reminder_settings.habit_selection == "selected" do %>
+            <div class="space-y-2 pl-4 border-l-2 border-blue-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Select Habits
+              </label>
+              <%= if @habits == [] do %>
+                <p class="text-sm text-gray-500 italic">
+                  No active habits yet. Create some habits first!
+                </p>
+              <% else %>
+                <div class="space-y-2 max-h-60 overflow-y-auto">
+                  <%= for habit <- @habits do %>
+                    <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="reminder_settings[selected_habit_ids][]"
+                        value={habit.id}
+                        checked={habit.id in (@reminder_settings.selected_habit_ids || [])}
+                        class="mr-3"
+                      />
+                      <span class="text-2xl mr-2">{habit.icon}</span>
+                      <span>{habit.name}</span>
+                    </label>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Save Reminder Settings
+          </button>
+        </div>
+      </.form>
+    </div>
+
+    <!-- Account Deletion -->
+    <div class="bg-white rounded-lg shadow-sm p-6 border-2 border-red-200">
+      <h2 class="text-xl font-semibold mb-4 text-red-600">Danger Zone</h2>
+      <p class="text-gray-600 mb-4">
+        Once you delete your account, there is no going back. All your habits and data will be permanently removed within 30 days.
+      </p>
+
+      <button
+        type="button"
+        phx-click="request_deletion"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+      >
+        Delete Account
+      </button>
+    </div>
+
+    <!-- Deletion Confirmation Modal -->
+    <%= if assigns[:show_deletion_modal] do %>
+      <div
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        phx-click="cancel_deletion"
+      >
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4" phx-click="cancel_deletion">
+          <h3 class="text-xl font-bold mb-4 text-red-600">Confirm Account Deletion</h3>
+          <p class="text-gray-700 mb-6">
+            Are you absolutely sure you want to delete your account? This action cannot be undone.
+            All your habits, logs, and data will be permanently deleted within 30 days.
+          </p>
+
+          <div class="flex gap-3 justify-end">
+            <button
+              type="button"
+              phx-click="cancel_deletion"
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              phx-click="confirm_deletion"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Yes, Delete My Account
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</Layouts.app>
