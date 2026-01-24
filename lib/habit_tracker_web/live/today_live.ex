@@ -228,8 +228,8 @@ defmodule HabitTrackerWeb.TodayLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 app-container" id="today-container" phx-hook=".SwipeDetector">
-      <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 app-container app-background" id="today-container" phx-hook=".SwipeDetector">
+      <div class="max-w-4xl mx-auto px-4 py-8 relative z-10">
         <%!-- Skip Navigation Link for Accessibility --%>
         <a href="#main-content" class="skip-nav">
           Skip to main content
@@ -274,10 +274,23 @@ defmodule HabitTrackerWeb.TodayLive do
             />
           <% end %>
 
-          <div :if={@habits_with_progress == []} class="text-center py-12">
-            <p class="text-gray-500 dark:text-gray-400">
-              No habits scheduled for this day
+          <div :if={@habits_with_progress == []} class="empty-state-enhanced">
+            <svg class="empty-state-icon-enhanced text-indigo-300 dark:text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <h2 class="empty-state-title-enhanced">No habits scheduled for this day</h2>
+            <p class="empty-state-description-enhanced">
+              Start building better routines by creating your first habit. Track daily activities, set goals, and watch your progress grow!
             </p>
+            <.link
+              navigate={~p"/app/habits/new"}
+              class="btn-primary spring-bounce"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Create Your First Habit
+            </.link>
           </div>
         </div>
       </div>

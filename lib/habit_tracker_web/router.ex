@@ -12,6 +12,11 @@ defmodule HabitTrackerWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug :put_current_path
+  end
+
+  defp put_current_path(conn, _opts) do
+    Plug.Conn.assign(conn, :current_path, conn.request_path)
   end
 
   pipeline :api do
@@ -95,6 +100,7 @@ defmodule HabitTrackerWeb.Router do
 
     live_session :current_user,
       on_mount: [{HabitTrackerWeb.UserAuth, :mount_current_scope}] do
+      live "/welcome", WelcomeLive, :index
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/confirm/:token", UserLive.Confirmation, :new

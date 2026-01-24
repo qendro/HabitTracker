@@ -63,6 +63,24 @@ defmodule HabitTrackerWeb.SettingsLive do
   end
 
   @impl true
+  def handle_event("toggle_reminders", _params, socket) do
+    user = socket.assigns.user
+    current_enabled = socket.assigns.reminder_settings.enabled
+
+    case HabitTracker.Reminders.update_reminder_settings(user, %{enabled: !current_enabled}) do
+      {:ok, updated_settings} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, if(!current_enabled, do: "Reminders enabled", else: "Reminders disabled"))
+         |> assign(:reminder_settings, updated_settings)
+         |> assign(:reminder_form, to_form(HabitTracker.Reminders.ReminderSettings.changeset(updated_settings, %{})))}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to update reminder settings")}
+    end
+  end
+
+  @impl true
   def handle_event("update_reminders", %{"reminder_settings" => reminder_params}, socket) do
     user = socket.assigns.user
 

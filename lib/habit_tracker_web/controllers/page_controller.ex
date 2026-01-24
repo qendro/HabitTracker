@@ -6,8 +6,8 @@ defmodule HabitTrackerWeb.PageController do
     if conn.assigns[:current_scope] do
       redirect(conn, to: ~p"/app/today")
     else
-      # Redirect unauthenticated users to login
-      redirect(conn, to: ~p"/users/log-in")
+      # Show welcome page to unauthenticated users
+      redirect(conn, to: ~p"/welcome")
     end
   end
 end

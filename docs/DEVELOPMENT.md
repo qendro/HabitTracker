@@ -197,16 +197,41 @@ make gigalixir-restart   # Restart app
 
 ### Admin Setup
 
+#### Default Admin Account (Localhost)
+
+For local development, a default admin account is available:
+
+- **Email:** `admin@habbits.xyz`
+- **Password:** `Admin123!`
+- **Login URL:** http://localhost:4000/admin/login
+
+This account should be created after initial setup using:
+```bash
+make create-admin
+# When prompted, enter:
+# Email: admin@habbits.xyz
+# Password: Admin123!
+```
+
+Or create it directly:
+```bash
+docker compose -f docker/docker-compose.yml exec web mix create_admin admin@habbits.xyz Admin123!
+```
+
+**⚠️ Security Note:** This is for local development only. Never use these credentials in production.
+
+#### Creating Custom Admin Accounts
+
 **Local (development):**
 ```bash
 make create-admin
-# Follow prompts
+# Follow prompts to enter custom email/password
 ```
 
 **Production:**
 ```bash
 make gigalixir-admin
-# Follow prompts
+# Follow prompts to enter secure credentials
 ```
 
 ### Rollback

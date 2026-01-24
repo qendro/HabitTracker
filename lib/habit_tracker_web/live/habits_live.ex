@@ -127,16 +127,16 @@ defmodule HabitTrackerWeb.HabitsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 app-background">
+      <div class="max-w-4xl mx-auto px-4 py-8 relative z-10">
         <%!-- Header --%>
-        <div class="flex items-center justify-between mb-6">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        <div class="flex items-center justify-between mb-8">
+          <h1 class="text-5xl font-extrabold text-gradient">
             My Habits
           </h1>
           <.link
             navigate={~p"/app/habits/new"}
-            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+            class="px-6 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl spring-bounce hover-lift"
           >
             <.icon name="hero-plus" class="w-5 h-5 inline-block mr-1" />
             New Habit
@@ -144,16 +144,13 @@ defmodule HabitTrackerWeb.HabitsLive do
         </div>
 
         <%!-- Filter Tabs --%>
-        <div class="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
+        <div class="mb-8 flex space-x-3">
           <button
             phx-click="filter"
             phx-value-filter="all"
             class={[
-              "px-4 py-2 font-medium transition-colors",
-              if(@filter == :all,
-                do: "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400",
-                else: "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              )
+              "filter-pill",
+              if(@filter == :all, do: "active", else: "")
             ]}
           >
             All
@@ -162,11 +159,8 @@ defmodule HabitTrackerWeb.HabitsLive do
             phx-click="filter"
             phx-value-filter="active"
             class={[
-              "px-4 py-2 font-medium transition-colors",
-              if(@filter == :active,
-                do: "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400",
-                else: "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              )
+              "filter-pill",
+              if(@filter == :active, do: "active", else: "")
             ]}
           >
             Active
@@ -175,11 +169,8 @@ defmodule HabitTrackerWeb.HabitsLive do
             phx-click="filter"
             phx-value-filter="inactive"
             class={[
-              "px-4 py-2 font-medium transition-colors",
-              if(@filter == :inactive,
-                do: "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400",
-                else: "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              )
+              "filter-pill",
+              if(@filter == :inactive, do: "active", else: "")
             ]}
           >
             Inactive
@@ -192,16 +183,22 @@ defmodule HabitTrackerWeb.HabitsLive do
             <.habit_card habit={habit} />
           <% end %>
 
-          <div :if={@habits == []} class="text-center py-12">
-            <p class="text-gray-500 dark:text-gray-400 mb-4">
+          <div :if={@habits == []} class="empty-state-enhanced">
+            <svg class="empty-state-icon-enhanced text-indigo-300 dark:text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <h2 class="empty-state-title-enhanced">
               <%= empty_message(@filter) %>
-            </p>
+            </h2>
             <.link
               :if={@filter != :all}
               navigate={~p"/app/habits/new"}
-              class="text-blue-600 dark:text-blue-400 hover:underline"
+              class="btn-primary spring-bounce"
             >
-              Create your first habit
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Create Your First Habit
             </.link>
           </div>
         </div>
@@ -258,7 +255,7 @@ defmodule HabitTrackerWeb.HabitsLive do
       id={"habit-#{@habit.id}"}
       data-habit-id={@habit.id}
       class={[
-        "bg-white dark:bg-gray-800 rounded-lg shadow p-4",
+        "habit-card-glass",
         !@habit.active && "opacity-60"
       ]}
     >
@@ -270,7 +267,10 @@ defmodule HabitTrackerWeb.HabitsLive do
 
         <div class="flex items-start space-x-3 flex-1">
           <%!-- Icon --%>
-          <div class="text-3xl flex-shrink-0" style={"color: #{@habit.color}"}>
+          <div 
+            class="habit-icon-enhanced"
+            style={"background: linear-gradient(135deg, #{@habit.color}20 0%, #{@habit.color}40 100%); color: #{@habit.color}; border: 2px solid #{@habit.color}30;"}
+          >
             <%= @habit.icon %>
           </div>
 
@@ -316,7 +316,7 @@ defmodule HabitTrackerWeb.HabitsLive do
         <div class="ml-4 flex flex-col space-y-2">
           <.link
             navigate={~p"/app/habits/#{@habit.id}/edit"}
-            class="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            class="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all spring-bounce hover-lift rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
             title="Edit"
           >
             <.icon name="hero-pencil" class="w-5 h-5" />
@@ -325,7 +325,7 @@ defmodule HabitTrackerWeb.HabitsLive do
           <button
             phx-click="toggle_active"
             phx-value-habit-id={@habit.id}
-            class="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+            class="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-all spring-bounce hover-lift rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20"
             title={if @habit.active, do: "Deactivate", else: "Activate"}
           >
             <.icon
@@ -338,7 +338,7 @@ defmodule HabitTrackerWeb.HabitsLive do
             phx-click="delete_habit"
             phx-value-habit-id={@habit.id}
             data-confirm="Are you sure you want to delete this habit? This action cannot be undone."
-            class="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            class="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all spring-bounce hover-lift rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
             title="Delete"
           >
             <.icon name="hero-trash" class="w-5 h-5" />
