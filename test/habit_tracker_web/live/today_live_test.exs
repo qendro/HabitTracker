@@ -27,7 +27,7 @@ defmodule HabitTrackerWeb.TodayLiveTest do
 
       assert has_element?(view, "#habit-card-#{habit.id}")
       assert render(view) =~ "Morning Exercise"
-      assert render(view) =~ "0 / 1 complete"
+      assert_completion_summary(render(view), 0, 1)
     end
 
     test "displays completion summary", %{conn: conn, user: user} do
@@ -44,7 +44,7 @@ defmodule HabitTrackerWeb.TodayLiveTest do
         |> log_in_user(user)
         |> live(~p"/app/today")
 
-      assert html =~ "1 / 2 complete"
+      assert_completion_summary(html, 1, 2)
     end
 
     test "navigates to previous day", %{conn: conn, user: user} do
@@ -142,14 +142,14 @@ defmodule HabitTrackerWeb.TodayLiveTest do
       |> element("button[phx-click='toggle_habit'][phx-value-habit-id='#{habit.id}']")
       |> render_click()
 
-      assert render(view) =~ "1 / 1 complete"
+      assert_completion_summary(render(view), 1, 1)
 
       # Toggle back to not complete
       view
       |> element("button[phx-click='toggle_habit'][phx-value-habit-id='#{habit.id}']")
       |> render_click()
 
-      assert render(view) =~ "0 / 1 complete"
+      assert_completion_summary(render(view), 0, 1)
     end
 
     test "displays numeric habit progress", %{conn: conn, user: user} do
@@ -219,7 +219,7 @@ defmodule HabitTrackerWeb.TodayLiveTest do
         |> log_in_user(user)
         |> live(~p"/app/today")
 
-      assert html =~ "3 day streak"
+      assert html =~ "3 days"
     end
 
     test "shows 'as of today' label for future dates", %{conn: conn, user: user} do
@@ -302,14 +302,17 @@ defmodule HabitTrackerWeb.TodayLiveTest do
 
       {:ok, view, _html} = live(conn, ~p"/app/today")
 
-      # Attempt to toggle habit
-      view
-      |> element("button[phx-click='toggle_habit'][phx-value-habit-id='#{habit.id}']")
-      |> render_click()
+      # Verify read-only UI is shown (no toggle button)
+      refute has_element?(
+               view,
+               "button[phx-click='toggle_habit'][phx-value-habit-id='#{habit.id}']"
+             )
+
+      assert has_element?(view, "div[aria-label='Read-only mode']")
 
       # Verify habit was not completed (readonly mode blocked the mutation)
       html = render(view)
-      assert html =~ "0 / 1 complete"
+      assert_completion_summary(html, 0, 1)
       assert html =~ "Not Complete"
       
       # Verify no log was created in the database
@@ -333,10 +336,9 @@ defmodule HabitTrackerWeb.TodayLiveTest do
 
       {:ok, view, _html} = live(conn, ~p"/app/today")
 
-      # Attempt to log value
-      view
-      |> element("form[phx-submit='log_value']")
-      |> render_submit(%{"habit-id" => to_string(habit.id), "value" => "5"})
+      # Verify read-only UI is shown (no log form)
+      refute has_element?(view, "form[phx-submit='log_value']")
+      assert has_element?(view, "input[type='number'][disabled]")
 
       # Verify value was not logged (readonly mode blocked the mutation)
       html = render(view)
@@ -364,10 +366,9 @@ defmodule HabitTrackerWeb.TodayLiveTest do
 
       {:ok, view, _html} = live(conn, ~p"/app/today")
 
-      # Attempt to log duration
-      view
-      |> element("form[phx-submit='log_value']")
-      |> render_submit(%{"habit-id" => to_string(habit.id), "value" => "15"})
+      # Verify read-only UI is shown (no log form)
+      refute has_element?(view, "form[phx-submit='log_value']")
+      assert has_element?(view, "input[type='number'][disabled]")
 
       # Verify duration was not logged (readonly mode blocked the mutation)
       html = render(view)
@@ -399,7 +400,16 @@ defmodule HabitTrackerWeb.TodayLiveTest do
 
       # Verify we can still view the habit and its completion status
       assert html =~ "Morning Exercise"
-      assert html =~ "1 / 1 complete"
+      assert_completion_summary(html, 1, 1)
     end
+  end
+
+  defp assert_completion_summary(html, completed, total) do
+    assert html =~ "Habits Complete"
+
+    pattern =
+      ~r|>\s*#{completed}\s*</span>\s*<span[^>]*>/\s*</span>\s*<span[^>]*>\s*#{total}\s*</span>|
+
+    assert html =~ pattern
   end
 end

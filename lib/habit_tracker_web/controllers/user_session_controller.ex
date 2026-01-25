@@ -14,7 +14,7 @@ defmodule HabitTrackerWeb.UserSessionController do
     %{"email" => email, "password" => password} = user_params
     ip = Security.get_client_ip(conn)
 
-    case RateLimiter.check_login(client_ip(conn)) do
+    case RateLimiter.check_login(ip) do
       :deny ->
         Security.log_event(:rate_limit_exceeded, %{
           endpoint: "login",
@@ -78,9 +78,5 @@ defmodule HabitTrackerWeb.UserSessionController do
     conn
     |> put_flash(:info, "Logged out successfully.")
     |> UserAuth.log_out_user()
-  end
-
-  defp client_ip(conn) do
-    conn.remote_ip |> :inet.ntoa() |> to_string()
   end
 end

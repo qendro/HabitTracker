@@ -10,6 +10,7 @@ defmodule HabitTrackerWeb.UserLive.Registration do
     ~H"""
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full space-y-8">
+        <Layouts.flash_group flash={@flash} />
         <%!-- Logo/Header --%>
         <div class="text-center">
           <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
@@ -174,19 +175,28 @@ defmodule HabitTrackerWeb.UserLive.Registration do
       :allow ->
         case Accounts.register_user(user_params) do
           {:ok, user} ->
-            {:ok, _} =
-              Accounts.deliver_user_confirmation_instructions(
-                user,
-                &url(~p"/users/confirm/#{&1}")
-              )
+            case Accounts.deliver_user_confirmation_instructions(
+                   user,
+                   &url(~p"/users/confirm/#{&1}")
+                 ) do
+              {:ok, _} ->
+                {:noreply,
+                 socket
+                 |> put_flash(
+                   :info,
+                   "Account created! Please check #{user.email} for a confirmation link to activate your account."
+                 )
+                 |> push_navigate(to: ~p"/users/log-in")}
 
-            {:noreply,
-             socket
-             |> put_flash(
-               :info,
-               "Account created! Please check #{user.email} for a confirmation link to activate your account."
-             )
-             |> push_navigate(to: ~p"/users/log-in")}
+              {:error, _reason} ->
+                {:noreply,
+                 socket
+                 |> put_flash(
+                   :error,
+                   "Account created, but we couldn't send the confirmation email. Please try again later."
+                 )
+                 |> push_navigate(to: ~p"/users/log-in")}
+            end
 
           {:error, %Ecto.Changeset{} = changeset} ->
             {:noreply, assign_form(socket, changeset)}
@@ -210,9 +220,41 @@ defmodule HabitTrackerWeb.UserLive.Registration do
   end
 
   defp get_client_ip(socket) do
-    case get_connect_info(socket, :peer_data) do
-      %{address: address} -> address |> :inet.ntoa() |> to_string()
-      _ -> nil
+    forwarded_ip =
+      socket
+      |> get_connect_info(:x_headers)
+      |> forwarded_for_ip()
+
+    if forwarded_ip do
+      forwarded_ip
+    else
+      case get_connect_info(socket, :peer_data) do
+        %{address: address} -> address |> :inet.ntoa() |> to_string()
+        _ -> nil
+      end
+    end
+  end
+
+  defp forwarded_for_ip(nil), do: nil
+
+  defp forwarded_for_ip(headers) when is_list(headers) do
+    headers
+    |> Enum.find_value(fn
+      {key, value} when is_binary(key) and is_binary(value) ->
+        if String.downcase(key) == "x-forwarded-for", do: value, else: nil
+
+      _ ->
+        nil
+    end)
+    |> case do
+      nil ->
+        nil
+
+      value ->
+        value
+        |> String.split(",")
+        |> List.first()
+        |> String.trim()
     end
   end
 end

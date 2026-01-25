@@ -1,5 +1,6 @@
 <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-12">
   <div class="max-w-md w-full space-y-8">
+    <Layouts.flash_group flash={@flash} />
     <%!-- Logo/Header --%>
     <div class="text-center">
       <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
@@ -26,9 +27,9 @@
         <% end %>
 
         <div>
-          <.label for="user_email" class="block text-sm font-semibold text-gray-900 mb-2">
+          <label for="user_email" class="block text-sm font-semibold text-gray-900 mb-2">
             Email address
-          </.label>
+          </label>
           <.input
             field={f[:email]}
             type="email"
@@ -41,9 +42,9 @@
         </div>
 
         <div>
-          <.label for="user_password" class="block text-sm font-semibold text-gray-900 mb-2">
+          <label for="user_password" class="block text-sm font-semibold text-gray-900 mb-2">
             Password
-          </.label>
+          </label>
           <.input
             field={f[:password]}
             type="password"

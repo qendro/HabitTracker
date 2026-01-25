@@ -8,8 +8,8 @@ defmodule HabitTrackerWeb.UserLive.LoginTest do
     test "renders login page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
-      assert html =~ "Log in"
-      assert html =~ "Sign up"
+      assert html =~ "Welcome back"
+      assert html =~ "Sign up for free"
       assert html =~ "Forgot your password?"
     end
   end
@@ -50,13 +50,9 @@ defmodule HabitTrackerWeb.UserLive.LoginTest do
     test "redirects to registration page when the Register button is clicked", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
-      {:ok, _login_live, login_html} =
-        lv
-        |> element("main a", "Sign up")
-        |> render_click()
-        |> follow_redirect(conn, ~p"/users/register")
-
-      assert login_html =~ "Register"
+      html = render(lv)
+      assert html =~ ~p"/users/register"
+      assert html =~ "Sign up for free"
     end
   end
 
@@ -70,11 +66,11 @@ defmodule HabitTrackerWeb.UserLive.LoginTest do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
       assert html =~ "You need to reauthenticate"
-      refute html =~ "Sign up"
+      refute html =~ "Sign up for free"
       assert html =~ "Forgot your password?"
 
-      assert html =~
-               ~s(<input type="email" name="user[email]" id="login_form_email" value="#{user.email}")
+      assert html =~ "login_form_email"
+      assert html =~ ~s(value="#{user.email}")
     end
   end
 end

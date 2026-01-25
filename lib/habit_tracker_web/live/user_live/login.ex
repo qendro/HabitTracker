@@ -6,6 +6,7 @@ defmodule HabitTrackerWeb.UserLive.Login do
     ~H"""
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full space-y-8">
+        <Layouts.flash_group flash={@flash} />
         <%!-- Logo/Header --%>
         <div class="text-center">
           <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">

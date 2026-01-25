@@ -18,7 +18,7 @@ defmodule HabitTrackerWeb.SettingsLiveTest do
 
       assert html =~ "Settings"
       assert html =~ "Timezone"
-      assert html =~ "Theme"
+      assert html =~ "Email Reminders"
       assert html =~ "Danger Zone"
     end
 
@@ -35,17 +35,17 @@ defmodule HabitTrackerWeb.SettingsLiveTest do
       assert render(view) =~ "Timezone updated successfully"
     end
 
-    test "updates theme", %{conn: conn, user: user} do
+    test "toggles reminders", %{conn: conn, user: user} do
       {:ok, view, _html} =
         conn
         |> log_in_user(user)
         |> live(~p"/app/settings")
 
       view
-      |> element("input[value='dark']")
+      |> element("input[type='checkbox'][phx-click='toggle_reminders']")
       |> render_click()
 
-      assert render(view) =~ "Theme updated successfully"
+      assert render(view) =~ "Reminders enabled"
     end
 
     test "shows deletion confirmation modal", %{conn: conn, user: user} do
