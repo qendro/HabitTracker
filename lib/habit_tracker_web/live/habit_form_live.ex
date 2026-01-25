@@ -1,8 +1,6 @@
 defmodule HabitTrackerWeb.HabitFormLive do
   use HabitTrackerWeb, :live_view
 
-  import HabitTrackerWeb.CoreComponents
-
   alias HabitTracker.Tracker
   alias HabitTracker.Tracker.Habit
   alias HabitTrackerWeb.HabitComponents

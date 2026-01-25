@@ -2,7 +2,6 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
   use HabitTrackerWeb, :live_view
 
   alias HabitTracker.Admin
-  alias HabitTracker.Accounts
   import HabitTrackerWeb.AdminComponents
 
   @impl true
@@ -17,7 +16,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
       summary ->
         {:ok,
          socket
-         |> assign(:current_scope, nil)
+         |> assign(:current_scope, %{})
          |> assign(:user_summary, summary)
          |> assign(:user, summary.user)
          |> assign(:show_delete_modal, false)

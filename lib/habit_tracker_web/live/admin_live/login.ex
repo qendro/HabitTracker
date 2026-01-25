@@ -4,7 +4,7 @@ defmodule HabitTrackerWeb.AdminLive.Login do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={nil}>
+    <Layouts.app flash={@flash} current_scope={%{}}>
       <div class="mx-auto max-w-sm space-y-4">
         <div class="text-center">
           <.header>

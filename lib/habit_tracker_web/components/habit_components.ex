@@ -3,7 +3,6 @@ defmodule HabitTrackerWeb.HabitComponents do
   Reusable habit-related UI components.
   """
   use Phoenix.Component
-  import HabitTrackerWeb.CoreComponents
 
   @doc """
   Renders a unified habit icon with consistent styling.
@@ -432,10 +431,6 @@ defmodule HabitTrackerWeb.HabitComponents do
   end
 
   # Helper functions
-
-  defp status_color(:complete), do: "bg-green-100 text-green-800"
-  defp status_color(:planned), do: "bg-blue-100 text-blue-800"
-  defp status_color(:not_complete), do: "bg-gray-100 text-gray-800"
 
   defp status_label(:complete), do: "Complete"
   defp status_label(:planned), do: "Planned"

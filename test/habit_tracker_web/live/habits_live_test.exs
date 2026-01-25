@@ -12,8 +12,8 @@ defmodule HabitTrackerWeb.HabitsLiveTest do
     end
 
     test "displays all habits", %{conn: conn, user: user} do
-      habit1 = habit_fixture(user, %{name: "Morning Exercise", type: :binary, icon: "🏃", color: "#3B82F6"})
-      habit2 = habit_fixture(user, %{name: "Read Book", type: :binary, icon: "📚", color: "#10B981"})
+      _habit1 = habit_fixture(user, %{name: "Morning Exercise", type: :binary, icon: "🏃", color: "#3B82F6"})
+      _habit2 = habit_fixture(user, %{name: "Read Book", type: :binary, icon: "📚", color: "#10B981"})
 
       {:ok, _view, html} =
         conn
@@ -52,7 +52,7 @@ defmodule HabitTrackerWeb.HabitsLiveTest do
     end
 
     test "displays habit details", %{conn: conn, user: user} do
-      habit = habit_fixture(user, %{
+      _habit = habit_fixture(user, %{
         name: "Drink Water",
         description: "Stay hydrated",
         type: :numeric,
@@ -74,7 +74,7 @@ defmodule HabitTrackerWeb.HabitsLiveTest do
     end
 
     test "displays schedule information", %{conn: conn, user: user} do
-      habit = habit_fixture(user, %{
+      _habit = habit_fixture(user, %{
         name: "Weekday Habit",
         type: :binary,
         icon: "💼",

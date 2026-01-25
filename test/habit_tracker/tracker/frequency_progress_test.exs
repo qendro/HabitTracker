@@ -91,7 +91,6 @@ defmodule HabitTracker.Tracker.FrequencyProgressTest do
       today = today_in_timezone("America/New_York")
       day_of_week = Date.day_of_week(today)
       start_of_week = Date.add(today, -(day_of_week - 1))
-      end_of_week = Date.add(start_of_week, 6)
 
       # Complete all days in the week
       for days_offset <- 0..6 do

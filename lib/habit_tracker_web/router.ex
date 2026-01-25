@@ -139,6 +139,7 @@ defmodule HabitTrackerWeb.Router do
       live "/activity", AdminLive.Activity, :index
     end
 
+    get "/impersonate/:user_id", AdminSessionController, :impersonate
     delete "/log-out", AdminSessionController, :delete
     post "/stop-impersonation", AdminSessionController, :stop_impersonation
   end

@@ -11,7 +11,7 @@ defmodule HabitTrackerWeb.AdminLive.HomeTest do
     end
 
     test "displays system metrics", %{conn: conn, admin: admin} do
-      {:ok, view, html} = conn |> log_in_admin(admin) |> live(~p"/admin")
+      {:ok, _view, html} = conn |> log_in_admin(admin) |> live(~p"/admin")
 
       assert html =~ "Admin Dashboard"
       assert html =~ "Total Users"
@@ -22,7 +22,7 @@ defmodule HabitTrackerWeb.AdminLive.HomeTest do
     end
 
     test "displays metric values", %{conn: conn, admin: admin} do
-      {:ok, view, html} = conn |> log_in_admin(admin) |> live(~p"/admin")
+      {:ok, _view, html} = conn |> log_in_admin(admin) |> live(~p"/admin")
 
       # Should display numeric values for metrics
       assert html =~ ~r/\d+/

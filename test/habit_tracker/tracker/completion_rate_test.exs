@@ -43,7 +43,6 @@ defmodule HabitTracker.Tracker.CompletionRateTest do
       today = today_in_timezone("America/New_York")
       day_of_week = Date.day_of_week(today)
       start_of_week = Date.add(today, -(day_of_week - 1))
-      end_of_week = Date.add(start_of_week, 6)
       
       # Complete all days this week (entire week, not just up to today)
       for days_offset <- 0..6 do
@@ -149,7 +148,6 @@ defmodule HabitTracker.Tracker.CompletionRateTest do
       today = today_in_timezone("America/Los_Angeles")
       day_of_week = Date.day_of_week(today)
       start_of_week = Date.add(today, -(day_of_week - 1))
-      end_of_week = Date.add(start_of_week, 6)
       
       # Complete Monday and Tuesday (days 1 and 2)
       {:ok, _} = Tracker.log_habit(habit, start_of_week, %{status: :complete})
