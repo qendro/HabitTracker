@@ -7,24 +7,25 @@ defmodule HabitTracker.Application do
 
   @impl true
   def start(_type, _args) do
-    # Conditionally start Oban only if not on free tier
+    # Get Oban config to check if we should start it
     oban_config = Application.get_env(:habit_tracker, Oban, [])
     
-    children = [
+    # Base children that always start
+    base_children = [
       HabitTrackerWeb.Telemetry,
       HabitTracker.Repo,
       {DNSCluster, query: Application.get_env(:habit_tracker, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: HabitTracker.PubSub}
     ]
     
-    # Only start Oban if queues are configured (not on free tier)
-    children = if oban_config[:queues] != false do
-      children ++ [{Oban, oban_config}]
+    # Only add Oban if not in testing mode (free tier uses testing: :manual to disable)
+    children = if oban_config[:testing] == :manual do
+      base_children
     else
-      children
+      base_children ++ [{Oban, oban_config}]
     end
     
-    # Start to serve requests, typically the last entry
+    # Always add endpoint last
     children = children ++ [HabitTrackerWeb.Endpoint]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

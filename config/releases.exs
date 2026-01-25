@@ -4,13 +4,7 @@ import Config
 # It is executed after compilation and before the system starts.
 # For compile-time configuration, see config/prod.exs
 
-# Configure Oban for background jobs with MINIMAL queue sizes for free tier
-# Free tier PostgreSQL only allows 2 total connections!
-# We use 1 for web requests and 1 shared across all Oban queues
-config :habit_tracker, Oban,
-  repo: HabitTracker.Repo,
-  queues: false,  # Disable queues in production on free tier
-  plugins: [
-    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7}
-    # Cron disabled on free tier due to connection limits
-  ]
+# DISABLE Oban completely on free tier - only 2 DB connections available
+# Oban requires at least 1 connection even with queues disabled
+# We need both connections for the web app
+config :habit_tracker, Oban, testing: :manual
