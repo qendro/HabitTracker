@@ -83,7 +83,7 @@ config :hammer,
 
 config :habit_tracker, Oban,
   engine: Oban.Engines.Basic,
-  queues: [default: 10, emails: 20, metrics: 5, cleanup: 5],
+  queues: [default: 2, emails: 2, metrics: 1, cleanup: 1],
   repo: HabitTracker.Repo,
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},

@@ -4,12 +4,12 @@ import Config
 # It is executed after compilation and before the system starts.
 # For compile-time configuration, see config/prod.exs
 
-# Configure Oban for background jobs
+# Configure Oban for background jobs with minimal queue sizes for free tier
 config :habit_tracker, Oban,
   repo: HabitTracker.Repo,
   queues: [
-    default: 10,
-    emails: 5,
+    default: 1,
+    emails: 1,
     metrics: 1,
     cleanup: 1
   ],
