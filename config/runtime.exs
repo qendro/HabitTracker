@@ -41,6 +41,9 @@ if config_env() == :prod do
     # pool_count: 4,
     socket_options: maybe_ipv6
 
+  # Disable Oban completely on free tier to conserve DB connections.
+  config :habit_tracker, Oban, testing: :manual
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
