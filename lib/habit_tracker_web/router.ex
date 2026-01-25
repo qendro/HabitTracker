@@ -101,12 +101,15 @@ defmodule HabitTrackerWeb.Router do
     live_session :current_user,
       on_mount: [{HabitTrackerWeb.UserAuth, :mount_current_scope}] do
       live "/welcome", WelcomeLive, :index
-      live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/confirm/:token", UserLive.Confirmation, :new
       live "/users/reset-password", UserLive.ResetPasswordRequest, :new
       live "/users/reset-password/:token", UserLive.ResetPassword, :edit
     end
+
+    # Use controller for registration (more reliable than LiveView)
+    get "/users/register", UserRegistrationController, :new
+    post "/users/register", UserRegistrationController, :create
 
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete

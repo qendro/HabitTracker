@@ -34,8 +34,10 @@ help:
 	@echo "  make gigalixir-deploy   - Deploy to Gigalixir"
 	@echo "  make gigalixir-migrate  - Run migrations on Gigalixir"
 	@echo "  make gigalixir-admin    - Create admin account on Gigalixir"
+	@echo "  make gigalixir-fix-db   - Fix database connection pool issues"
 	@echo "  make gigalixir-logs     - View Gigalixir app logs"
 	@echo "  make gigalixir-status   - Check Gigalixir app status"
+	@echo "  make gigalixir-config   - View current configuration"
 	@echo "  make gigalixir-domain   - Setup custom domain"
 	@echo "  make gigalixir-domains  - List configured domains"
 	@echo "  make gigalixir-restart  - Restart app"
@@ -199,9 +201,9 @@ gigalixir-restart:
 	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/restart.sh
 
 gigalixir-config:
-	@echo "Configuring environment variables..."
-	@if [ ! -f .env.gigalixir ]; then \
-		echo "Error: .env.gigalixir file not found"; \
-		exit 1; \
-	fi
-	@export $(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/configure-env.sh
+	@echo "Viewing current configuration..."
+	@./scripts/check-production-config.sh
+
+gigalixir-fix-db:
+	@echo "Fixing database connection pool configuration..."
+	@./scripts/fix-production-db.sh
