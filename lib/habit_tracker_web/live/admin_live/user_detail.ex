@@ -3,6 +3,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
 
   alias HabitTracker.Admin
   alias HabitTracker.Accounts
+  import HabitTrackerWeb.AdminComponents
 
   @impl true
   def mount(%{"id" => user_id}, _session, socket) do
@@ -119,6 +120,7 @@ defmodule HabitTrackerWeb.AdminLive.UserDetail do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
+      <.admin_nav current_path={~p"/admin/users"} />
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <%!-- Back button --%>
         <div class="mb-6">

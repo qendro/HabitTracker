@@ -3,6 +3,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
 
   alias HabitTracker.Admin
   alias HabitTracker.Admin.AdminAction
+  import HabitTrackerWeb.AdminComponents
 
   @impl true
   def mount(_params, _session, socket) do
@@ -96,6 +97,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
+      <.admin_nav current_path={~p"/admin/activity"} />
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
           <h1 class="text-3xl font-bold text-gray-900">
@@ -116,7 +118,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               <select
                 phx-change="filter_by_action"
                 name="action"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 bg-white"
               >
                 <option value="all" selected={@filter_action == "all"}>All Actions</option>
                 <option

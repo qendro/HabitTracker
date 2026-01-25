@@ -68,7 +68,6 @@ defmodule HabitTrackerWeb.UserLive.Registration do
             </div>
 
             <input
-              field={@form[:timezone]}
               type="hidden"
               id="registration-timezone"
               name="user[timezone]"

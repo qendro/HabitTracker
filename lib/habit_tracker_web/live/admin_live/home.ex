@@ -2,6 +2,7 @@ defmodule HabitTrackerWeb.AdminLive.Home do
   use HabitTrackerWeb, :live_view
 
   alias HabitTracker.Admin
+  import HabitTrackerWeb.AdminComponents
 
   @impl true
   def mount(_params, _session, socket) do
@@ -38,6 +39,7 @@ defmodule HabitTrackerWeb.AdminLive.Home do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
+      <.admin_nav current_path={~p"/admin"} />
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8 flex items-center justify-between">
           <div>
@@ -105,13 +107,6 @@ defmodule HabitTrackerWeb.AdminLive.Home do
             value={@metrics.total_habits}
             icon="hero-clipboard-document-list"
             color="indigo"
-          />
-
-          <.metric_card
-            title="Active Habits"
-            value={@metrics.active_habits}
-            icon="hero-clipboard-document-check"
-            color="green"
           />
 
           <.metric_card

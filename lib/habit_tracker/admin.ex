@@ -78,6 +78,19 @@ defmodule HabitTracker.Admin do
   alias HabitTracker.Admin.{DailyMetric, AdminAction}
 
   @doc """
+  Lists all users in the system.
+
+  Returns a list of all non-deleted users, ordered by most recent first.
+  """
+  def list_all_users do
+    from(u in User,
+      where: is_nil(u.deleted_at),
+      order_by: [desc: u.inserted_at]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
   Searches for users by email or ID.
 
   Returns a list of users matching the search query.
