@@ -71,7 +71,7 @@ defmodule HabitTrackerWeb.UserLive.Registration do
               type="hidden"
               id="registration-timezone"
               name="user[timezone]"
-              value={@form[:timezone].value}
+              value={Phoenix.HTML.Form.input_value(@form, :timezone) || "UTC"}
               phx-hook="TimezoneDetect"
             />
 
@@ -128,7 +128,7 @@ defmodule HabitTrackerWeb.UserLive.Registration do
 
   def mount(_params, _session, socket) do
     changeset =
-      Accounts.change_user_registration(%User{}, %{},
+      Accounts.change_user_registration(%User{}, %{timezone: "UTC"},
         validate_unique: false,
         hash_password: false
       )
