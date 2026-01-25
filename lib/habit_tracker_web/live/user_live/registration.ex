@@ -28,6 +28,17 @@ defmodule HabitTrackerWeb.UserLive.Registration do
 
         <%!-- Registration Form --%>
         <div class="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-8 border border-gray-100">
+          <%= if @form.errors != [] do %>
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p class="text-sm font-semibold text-red-800">Please fix the following errors:</p>
+              <ul class="mt-2 text-sm text-red-600 list-disc list-inside">
+                <%= for {field, {msg, _}} <- @form.errors do %>
+                  <li><%= Phoenix.Naming.humanize(field) %>: <%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+          
           <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate" class="space-y-6">
             <div>
               <label for="registration_form_email" class="block text-sm font-semibold text-gray-900 mb-2">
@@ -37,7 +48,7 @@ defmodule HabitTrackerWeb.UserLive.Registration do
                 id="registration_form_email"
                 name="user[email]"
                 type="email"
-                value={@form[:email].value}
+                value={Phoenix.HTML.Form.input_value(@form, :email)}
                 autocomplete="username"
                 required
                 phx-mounted={JS.focus()}
@@ -45,6 +56,11 @@ defmodule HabitTrackerWeb.UserLive.Registration do
                 placeholder="you@example.com"
                 style="font-size: 16px;"
               />
+              <%= if @form[:email].errors != [] do %>
+                <p class="mt-1 text-sm text-red-600">
+                  <%= elem(hd(@form[:email].errors), 0) %>
+                </p>
+              <% end %>
             </div>
 
             <div>
@@ -55,7 +71,7 @@ defmodule HabitTrackerWeb.UserLive.Registration do
                 id="registration_form_password"
                 name="user[password]"
                 type="password"
-                value={@form[:password].value}
+                value={Phoenix.HTML.Form.input_value(@form, :password)}
                 autocomplete="new-password"
                 required
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
@@ -65,6 +81,11 @@ defmodule HabitTrackerWeb.UserLive.Registration do
               <p class="mt-2 text-xs text-gray-500">
                 Must be at least 8 characters long
               </p>
+              <%= if @form[:password].errors != [] do %>
+                <p class="mt-1 text-sm text-red-600">
+                  <%= elem(hd(@form[:password].errors), 0) %>
+                </p>
+              <% end %>
             </div>
 
             <input
