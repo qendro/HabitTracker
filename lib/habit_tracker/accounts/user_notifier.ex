@@ -3,17 +3,41 @@ defmodule HabitTracker.Accounts.UserNotifier do
 
   alias HabitTracker.Mailer
 
+  require Logger
+
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
+    sender_email = Application.get_env(:habit_tracker, :sender_email, "noreply@habittracker.com")
+    
+    Logger.info("Sending email",
+      to: recipient,
+      subject: subject,
+      from: sender_email
+    )
+    
     email =
       new()
       |> to(recipient)
-      |> from({"HabitTracker", "contact@example.com"})
+      |> from({"HabitTracker", sender_email})
       |> subject(subject)
       |> text_body(body)
 
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
+    case Mailer.deliver(email) do
+      {:ok, metadata} ->
+        Logger.info("Email sent successfully",
+          to: recipient,
+          subject: subject,
+          metadata: inspect(metadata)
+        )
+        {:ok, email}
+        
+      {:error, reason} ->
+        Logger.error("Failed to send email",
+          to: recipient,
+          subject: subject,
+          error: inspect(reason)
+        )
+        {:error, reason}
     end
   end
 
