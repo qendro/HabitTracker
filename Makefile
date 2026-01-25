@@ -197,3 +197,11 @@ gigalixir-restart:
 		exit 1; \
 	fi
 	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/restart.sh
+
+gigalixir-config:
+	@echo "Configuring environment variables..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/configure-env.sh

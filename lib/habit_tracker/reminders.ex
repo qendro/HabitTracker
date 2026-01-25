@@ -167,15 +167,34 @@ defmodule HabitTracker.Reminders do
     email = compose_reminder_email(user, habits)
 
     case Mailer.deliver(email) do
-      {:ok, _metadata} -> {:ok, :sent}
-      {:error, reason} -> {:error, reason}
+      {:ok, metadata} ->
+        require Logger
+        Logger.info("Reminder email sent successfully",
+          user_id: user.id,
+          email: user.email,
+          habit_count: length(habits),
+          metadata: inspect(metadata)
+        )
+        {:ok, :sent}
+
+      {:error, reason} ->
+        require Logger
+        Logger.error("Failed to send reminder email",
+          user_id: user.id,
+          email: user.email,
+          error: inspect(reason)
+        )
+        {:error, reason}
     end
   end
 
   # Private helper functions
 
   defp sender_email do
-    {"HabitTracker", Application.get_env(:habit_tracker, :sender_email, "noreply@habittracker.com")}
+    email = Application.get_env(:habit_tracker, :sender_email, "noreply@habittracker.com")
+    require Logger
+    Logger.debug("Using sender email: #{email}")
+    {"HabitTracker", email}
   end
 
   defp app_url do

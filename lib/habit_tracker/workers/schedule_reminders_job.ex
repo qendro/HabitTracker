@@ -22,8 +22,12 @@ defmodule HabitTracker.Workers.ScheduleRemindersJob do
 
   @impl Oban.Worker
   def perform(%Oban.Job{}) do
+    require Logger
+    
     # Get current UTC time
     now_utc = DateTime.utc_now()
+    
+    Logger.info("Running schedule reminders job", time: now_utc)
 
     # Find all users with reminders enabled
     settings =
@@ -32,6 +36,8 @@ defmodule HabitTracker.Workers.ScheduleRemindersJob do
         preload: [:user]
       )
       |> Repo.all()
+
+    Logger.info("Found users with reminders enabled", count: length(settings))
 
     # Schedule reminder for each user
     Enum.each(settings, fn setting ->
@@ -42,8 +48,16 @@ defmodule HabitTracker.Workers.ScheduleRemindersJob do
   end
 
   defp schedule_reminder_for_user(setting, now_utc) do
+    require Logger
+    
     user = setting.user
     timezone = user.timezone
+
+    Logger.debug("Scheduling reminder for user",
+      user_id: user.id,
+      timezone: timezone,
+      time_of_day: setting.time_of_day
+    )
 
     # Get user's current local datetime
     now_local = DateTime.shift_zone!(now_utc, timezone)
@@ -69,7 +83,25 @@ defmodule HabitTracker.Workers.ScheduleRemindersJob do
     # Convert send time to UTC for job scheduling
     send_datetime_utc = DateTime.shift_zone!(send_datetime_local, "Etc/UTC")
 
+    Logger.info("Enqueuing reminder email",
+      user_id: user.id,
+      reminder_date: reminder_date,
+      scheduled_at: send_datetime_utc
+    )
+
     # Enqueue the reminder email job
-    ReminderEmailJob.enqueue(user, reminder_date, send_datetime_utc)
+    case ReminderEmailJob.enqueue(user, reminder_date, send_datetime_utc) do
+      {:ok, job} ->
+        Logger.debug("Reminder job enqueued successfully",
+          user_id: user.id,
+          job_id: job.id
+        )
+        
+      {:error, reason} ->
+        Logger.error("Failed to enqueue reminder job",
+          user_id: user.id,
+          error: inspect(reason)
+        )
+    end
   end
 end

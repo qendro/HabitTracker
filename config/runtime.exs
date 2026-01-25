@@ -107,6 +107,13 @@ if config_env() == :prod do
     config :habit_tracker, HabitTracker.Mailer,
       adapter: Swoosh.Adapters.Resend,
       api_key: resend_api_key
+  else
+    # Log warning if no API key is set in production
+    IO.warn("RESEND_API_KEY not set - email functionality will not work")
+    
+    # Fallback to test adapter to prevent crashes
+    config :habit_tracker, HabitTracker.Mailer,
+      adapter: Swoosh.Adapters.Test
   end
 
   # Configure application URLs for email links
