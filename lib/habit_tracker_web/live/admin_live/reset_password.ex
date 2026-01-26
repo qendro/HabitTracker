@@ -2,7 +2,7 @@ defmodule HabitTrackerWeb.AdminLive.ResetPassword do
   use HabitTrackerWeb, :live_view
 
   alias HabitTracker.Admin
-  alias HabitTracker.Admin.Admin
+  alias HabitTracker.Admin.Admin, as: AdminSchema
 
   @impl true
   def render(assigns) do
@@ -103,7 +103,7 @@ defmodule HabitTrackerWeb.AdminLive.ResetPassword do
   @impl true
   def mount(%{"token" => token}, _session, socket) do
     case Admin.get_admin_by_reset_password_token(token) do
-      %Admin{} = admin ->
+      %AdminSchema{} = admin ->
         changeset = Admin.change_admin_password(admin, %{}, hash_password: false)
 
         {:ok,
@@ -133,7 +133,7 @@ defmodule HabitTrackerWeb.AdminLive.ResetPassword do
   @impl true
   def handle_event("reset_password", %{"admin" => admin_params}, socket) do
     case Admin.get_admin_by_reset_password_token(socket.assigns.token) do
-      %Admin{} = admin ->
+      %AdminSchema{} = admin ->
         case Admin.reset_admin_password(admin, admin_params) do
           {:ok, _} ->
             {:noreply,
