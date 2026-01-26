@@ -118,7 +118,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               <select
                 phx-change="filter_by_action"
                 name="action"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 bg-white"
+                class="block w-full rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 <option value="all" selected={@filter_action == "all"}>All Actions</option>
                 <option
@@ -135,7 +135,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               <div class="pt-6">
                 <button
                   phx-click="clear_filters"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-sm font-semibold rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 transition-all"
                 >
                   Clear Filters
                 </button>
@@ -226,19 +226,19 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               phx-click="prev_page"
               disabled={!@has_prev}
               class={[
-                "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                "inline-flex items-center gap-2 px-4 py-2 border-2 text-sm font-semibold rounded-xl transition-all",
                 if(@has_prev,
                   do:
-                    "border-gray-300 text-gray-700 bg-white hover:bg-gray-50",
-                  else: "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
+                    "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500",
+                  else: "border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-900 cursor-not-allowed"
                 )
               ]}
             >
-              <.icon name="hero-chevron-left" class="w-4 h-4 mr-2" />
+              <.icon name="hero-chevron-left" class="w-4 h-4" />
               Previous
             </button>
 
-            <span class="text-sm text-gray-600">
+            <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">
               Page <%= @page %>
             </span>
 
@@ -246,16 +246,16 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
               phx-click="next_page"
               disabled={!@has_more}
               class={[
-                "inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                "inline-flex items-center gap-2 px-4 py-2 border-2 text-sm font-semibold rounded-xl transition-all",
                 if(@has_more,
                   do:
-                    "border-gray-300 text-gray-700 bg-white hover:bg-gray-50",
-                  else: "border-gray-200 text-gray-400 bg-gray-100 cursor-not-allowed"
+                    "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500",
+                  else: "border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-900 cursor-not-allowed"
                 )
               ]}
             >
               Next
-              <.icon name="hero-chevron-right" class="w-4 h-4 ml-2" />
+              <.icon name="hero-chevron-right" class="w-4 h-4" />
             </button>
           </div>
         <% end %>
@@ -279,7 +279,7 @@ defmodule HabitTrackerWeb.AdminLive.Activity do
       "deactivate_user" -> "bg-yellow-100 text-yellow-800"
       "reactivate_user" -> "bg-green-100 text-green-800"
       "delete_user_requested" -> "bg-red-100 text-red-800"
-      "force_password_reset" -> "bg-purple-100 text-purple-800"
+      "force_password_reset" -> "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
       _ -> "bg-gray-100 text-gray-800"
     end
   end

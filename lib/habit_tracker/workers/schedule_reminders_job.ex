@@ -61,6 +61,7 @@ defmodule HabitTracker.Workers.ScheduleRemindersJob do
 
     # Get user's current local datetime
     now_local = DateTime.shift_zone!(now_utc, timezone)
+    today_local = DateTime.to_date(now_local)
 
     # Get the configured time of day for reminders
     reminder_time = setting.time_of_day
@@ -70,10 +71,10 @@ defmodule HabitTracker.Workers.ScheduleRemindersJob do
     send_datetime_local =
       if Time.compare(now_local.time, reminder_time) == :lt do
         # Reminder time hasn't passed yet today
-        DateTime.new!(Date.utc_today(), reminder_time, timezone)
+        DateTime.new!(today_local, reminder_time, timezone)
       else
         # Reminder time has passed, schedule for tomorrow
-        tomorrow = Date.add(Date.utc_today(), 1)
+        tomorrow = Date.add(today_local, 1)
         DateTime.new!(tomorrow, reminder_time, timezone)
       end
 

@@ -72,7 +72,7 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {TimezoneDetect, ScrollHeader}, // ...colocatedHooks removed temporarily
+  hooks: {TimezoneDetect, ScrollHeader}
 })
 
 // Show progress bar on live navigation and form submits

@@ -56,9 +56,9 @@ defmodule HabitTrackerWeb.AdminLive.Home do
             </span>
             <button
               phx-click="refresh"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-sm text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 transition-all"
             >
-              <.icon name="hero-arrow-path" class="w-4 h-4 mr-2" />
+              <.icon name="hero-arrow-path" class="w-4 h-4" />
               Refresh
             </button>
           </div>
@@ -169,8 +169,8 @@ defmodule HabitTrackerWeb.AdminLive.Home do
 
   defp metric_color_class("blue"), do: "bg-blue-500"
   defp metric_color_class("green"), do: "bg-green-500"
-  defp metric_color_class("purple"), do: "bg-purple-500"
-  defp metric_color_class("indigo"), do: "bg-indigo-500"
+  defp metric_color_class("cyan"), do: "bg-cyan-500"
+  defp metric_color_class("teal"), do: "bg-teal-500"
   defp metric_color_class("amber"), do: "bg-amber-500"
   defp metric_color_class(_), do: "bg-gray-500"
 

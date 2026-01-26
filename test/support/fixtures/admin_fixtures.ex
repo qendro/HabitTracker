@@ -19,4 +19,10 @@ defmodule HabitTracker.AdminFixtures do
 
     admin
   end
+
+  def extract_admin_token(fun) do
+    {:ok, captured_email} = fun.(&"[TOKEN]#{&1}[TOKEN]")
+    [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")
+    token
+  end
 end

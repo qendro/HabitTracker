@@ -1,0 +1,357 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-cyan-50/30 app-container">
+  <%!-- Animated background accents --%>
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl animate-blob"></div>
+    <div class="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-indigo-200/20 to-blue-200/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+    <div class="absolute top-1/2 left-1/2 w-72 h-72 bg-gradient-to-br from-cyan-200/20 to-teal-200/20 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+  </div>
+
+  <div class="relative max-w-4xl mx-auto px-4 py-8">
+    <%!-- Header --%>
+    <div class="mb-8 space-y-3">
+      <.link
+        navigate={~p"/app/habits"}
+        class="inline-flex items-center text-blue-600 hover:text-cyan-600 transition-all"
+      >
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Habits
+      </.link>
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <%= @page_title %>
+        </h1>
+      </div>
+      <p class="text-gray-600 text-lg">
+        <%= if @mode == :edit, do: "Update your habit details.", else: "Build a habit with a clear goal, schedule, and tracker type." %>
+      </p>
+    </div>
+
+    <% current_type = form_value(@form, :type, :binary) %>
+    <% goal_horizon = form_value(@form, :goal_horizon, :daily) %>
+    <% icon_value = form_value(@form, :icon, @habit.icon) %>
+    <% color_value = form_value(@form, :color, @habit.color) %>
+
+    <div class="space-y-8">
+      <%!-- Form --%>
+      <div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+          <.form
+            for={@form}
+            id="habit-form-v2"
+            phx-change="validate"
+            phx-submit="save"
+            class="space-y-8"
+          >
+            <% errors = form_errors(@form) %>
+            <div
+              :if={@form.source.action in [:validate, :insert] && errors != []}
+              class="rounded-xl border-2 border-red-200 bg-red-50 p-4"
+              role="alert"
+              aria-live="polite"
+            >
+              <p class="text-sm font-semibold text-red-800 mb-2">Please fix the following:</p>
+              <ul class="space-y-1 text-sm text-red-700">
+                <%= for {field, message} <- errors do %>
+                  <li>
+                    <span class="font-medium"><%= humanize_field(field) %>:</span>
+                    <%= message %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+
+            <.section
+              id="habit-basics"
+              title="Habit basics"
+              subtitle="Name it and pick an icon + color that feels right."
+            >
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+                <button
+                  type="button"
+                  phx-click="toggle_picker"
+                  aria-expanded={@show_picker}
+                  aria-controls="icon-color-picker"
+                  class="flex-shrink-0 rounded-2xl border-2 border-transparent focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                >
+                  <HabitComponents.habit_icon icon={icon_value} color={color_value} size="lg" />
+                </button>
+
+                <div class="flex-1" phx-mounted={JS.focus(to: "#habit-name")}>
+                  <.input
+                    field={@form[:name]}
+                    label="Habit name"
+                    placeholder="e.g., Morning Exercise, Read 30 minutes"
+                    phx-debounce="300"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all"
+                    error_class="border-red-500 focus:border-red-500 focus:ring-red-200"
+                    aria-invalid={@form[:name].errors != []}
+                    id="habit-name"
+                  />
+                  <p class="text-xs text-gray-500 mt-2">Click the icon to choose an icon and color.</p>
+                </div>
+              </div>
+
+              <input type="hidden" name="habit[icon]" value={icon_value} />
+              <input type="hidden" name="habit[color]" value={color_value} />
+
+              <div :if={@show_picker} id="icon-color-picker" class="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-semibold text-gray-700">Icon & color</p>
+                  <button type="button" phx-click="toggle_picker" class="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                    Close
+                  </button>
+                </div>
+
+                <fieldset class="space-y-3">
+                  <legend class="text-sm font-semibold text-gray-700">Icon</legend>
+                  <div class="grid grid-cols-6 gap-2">
+                    <%= for emoji <- @icons do %>
+                      <button
+                        type="button"
+                        phx-click="pick_icon"
+                        phx-value-icon={emoji}
+                        class={[
+                          "h-11 w-11 rounded-xl flex items-center justify-center text-xl transition-all",
+                          if(icon_value == emoji,
+                            do: "bg-blue-100 ring-2 ring-blue-500",
+                            else: "bg-white hover:bg-gray-100 border border-transparent"
+                          )
+                        ]}
+                        aria-label={"Select icon #{emoji}"}
+                      >
+                        <%= emoji %>
+                      </button>
+                    <% end %>
+                  </div>
+                </fieldset>
+
+                <fieldset class="space-y-3">
+                  <legend class="text-sm font-semibold text-gray-700">Color</legend>
+                  <div class="grid grid-cols-6 gap-2">
+                    <%= for color <- @colors do %>
+                      <button
+                        type="button"
+                        phx-click="pick_color"
+                        phx-value-color={color}
+                        class={[
+                          "h-11 w-11 rounded-xl transition-all border-2",
+                          if(color_value == color, do: "border-blue-500 ring-2 ring-blue-200", else: "border-transparent")
+                        ]}
+                        style={"background-color: #{color};"}
+                        aria-label={"Select color #{color}"}
+                      >
+                      </button>
+                    <% end %>
+                  </div>
+                </fieldset>
+              </div>
+            </.section>
+
+            <.section
+              id="habit-type"
+              title="Tracking type"
+              subtitle="Choose how you want to measure progress."
+            >
+              <fieldset class="grid gap-3 md:grid-cols-3">
+                <legend class="sr-only">Tracking type</legend>
+                <.choice_card
+                  id="habit-type-binary"
+                  name="habit[type]"
+                  value="binary"
+                  checked={current_type == :binary}
+                  label="Yes / No"
+                  description="Simple completion."
+                  phx-debounce="0"
+                >
+                  ✓
+                </.choice_card>
+
+                <.choice_card
+                  id="habit-type-numeric"
+                  name="habit[type]"
+                  value="numeric"
+                  checked={current_type == :numeric}
+                  label="Count"
+                  description="Track totals like pages or steps."
+                  phx-debounce="0"
+                >
+                  #
+                </.choice_card>
+
+                <.choice_card
+                  id="habit-type-duration"
+                  name="habit[type]"
+                  value="duration"
+                  checked={current_type == :duration}
+                  label="Time"
+                  description="Log minutes spent."
+                  phx-debounce="0"
+                >
+                  ⏱
+                </.choice_card>
+              </fieldset>
+
+              <div :if={current_type in [:numeric, :duration]} class="grid gap-4 md:grid-cols-2">
+                <.input
+                  field={@form[:target_value]}
+                  type="number"
+                  label={if current_type == :duration, do: "Target (minutes)", else: "Target"}
+                  min="1"
+                  step="1"
+                  placeholder={if current_type == :duration, do: "30", else: "10"}
+                  phx-debounce="300"
+                  required
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all"
+                  error_class="border-red-500 focus:border-red-500 focus:ring-red-200"
+                  aria-invalid={@form[:target_value].errors != []}
+                />
+
+                <.input
+                  :if={current_type == :numeric}
+                  field={@form[:unit_label]}
+                  label="Unit (optional)"
+                  placeholder="pages, glasses, km"
+                  phx-debounce="300"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all"
+                />
+              </div>
+            </.section>
+
+            <.section
+              id="habit-schedule"
+              title="Schedule"
+              subtitle="Set the days you want to stay on track."
+            >
+              <fieldset class="grid gap-3 md:grid-cols-2">
+                <legend class="sr-only">Schedule options</legend>
+                <.choice_card
+                  id="schedule-daily"
+                  name="habit[schedule_type]"
+                  value="daily"
+                  checked={@schedule_type == "daily"}
+                  label="Every day"
+                  description="Build the habit daily."
+                  phx-debounce="0"
+                >
+                  📅
+                </.choice_card>
+
+                <.choice_card
+                  id="schedule-weekdays"
+                  name="habit[schedule_type]"
+                  value="weekdays"
+                  checked={@schedule_type == "weekdays"}
+                  label="Specific days"
+                  description="Choose the days each week."
+                  phx-debounce="0"
+                >
+                  🗓
+                </.choice_card>
+              </fieldset>
+
+              <div :if={@schedule_type == "weekdays"} class="space-y-3">
+                <input type="hidden" name="habit[weekdays][]" value="" />
+                <div class="grid grid-cols-7 gap-2">
+                  <%= for {label, value, full} <- [{"M", 1, "Monday"}, {"T", 2, "Tuesday"}, {"W", 3, "Wednesday"}, {"T", 4, "Thursday"}, {"F", 5, "Friday"}, {"S", 6, "Saturday"}, {"S", 7, "Sunday"}] do %>
+                    <label class="block cursor-pointer text-center">
+                      <input
+                        type="checkbox"
+                        name="habit[weekdays][]"
+                        value={value}
+                        checked={value in @weekdays}
+                        class="sr-only peer"
+                      />
+                      <div class="rounded-lg border-2 border-gray-200 py-2 text-sm font-semibold text-gray-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700">
+                        <%= label %>
+                      </div>
+                      <span class="sr-only"><%= full %></span>
+                    </label>
+                  <% end %>
+                </div>
+                <%= for msg <- field_errors(@form, :occurrence_schedule) do %>
+                  <p class="mt-2 flex items-center gap-2 text-sm text-red-600">
+                    <.icon name="hero-exclamation-circle" class="size-4 shrink-0" />
+                    <span><%= msg %></span>
+                  </p>
+                <% end %>
+              </div>
+            </.section>
+
+            <%!-- Advanced Options --%>
+            <div class="border-t border-gray-200 pt-6">
+              <button
+                type="button"
+                phx-click="toggle_advanced"
+                class="flex w-full items-center justify-between text-left"
+              >
+                <span class="text-sm font-semibold text-gray-700">Advanced options</span>
+                <svg
+                  class={["w-5 h-5 text-gray-400 transition-transform", @show_advanced && "rotate-180"]}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <div :if={@show_advanced} class="mt-4 space-y-4">
+                <.input
+                  field={@form[:description]}
+                  type="textarea"
+                  label="Description"
+                  placeholder="Add context or notes..."
+                  rows="3"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all"
+                />
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <.input
+                    field={@form[:goal_horizon]}
+                    type="select"
+                    label="Goal horizon"
+                    options={["Daily": "daily", "Weekly": "weekly", "Monthly": "monthly", "Yearly": "yearly"]}
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all"
+                  />
+
+                  <.input
+                    :if={goal_horizon != :daily}
+                    field={@form[:frequency_goal]}
+                    type="number"
+                    label={"Times per #{goal_horizon}"}
+                    min="1"
+                    step="1"
+                    phx-debounce="300"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 transition-all"
+                    error_class="border-red-500 focus:border-red-500 focus:ring-red-200"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <%!-- Actions --%>
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-6">
+              <.link
+                navigate={~p"/app/habits"}
+                class="px-6 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-all font-semibold"
+              >
+                Cancel
+              </.link>
+              <button
+                type="submit"
+                class="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 text-white rounded-xl font-semibold shadow-lg transition-all"
+              >
+                <%= if @mode == :edit, do: "Save Changes", else: "Create Habit" %>
+              </button>
+            </div>
+          </.form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

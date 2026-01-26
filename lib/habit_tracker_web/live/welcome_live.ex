@@ -262,16 +262,16 @@ defmodule HabitTrackerWeb.WelcomeLive do
 
       <!-- CTA Section -->
       <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-12 sm:p-16 text-center shadow-2xl">
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-12 sm:p-16 text-center shadow-2xl">
           <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
             Ready to Build Better Habits?
           </h2>
-          <p class="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+          <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Join thousands of people transforming their lives one habit at a time. Start your journey today.
           </p>
           <.link
             navigate={~p"/users/register"}
-            class="inline-block px-8 py-4 bg-white text-indigo-600 text-lg font-semibold rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl"
+            class="inline-block px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl"
           >
             Get Started for Free
             <span class="ml-2">→</span>

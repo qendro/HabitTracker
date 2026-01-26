@@ -107,13 +107,16 @@ defmodule HabitTracker.Accounts do
   def confirm_user(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
          %User{} = user <- Repo.one(query),
-         {:ok, user} <-
-           Repo.transact(fn ->
+         {:ok, updated_user} <-
+           Repo.transaction(fn ->
              Repo.delete_all(UserToken.user_and_contexts_query(user, ["confirm"]))
-             {:ok, updated_user} = Repo.update(User.confirm_changeset(user))
-             {:ok, updated_user}
+
+             case Repo.update(User.confirm_changeset(user)) do
+               {:ok, updated_user} -> updated_user
+               {:error, changeset} -> Repo.rollback(changeset)
+             end
            end) do
-      {:ok, user}
+      {:ok, updated_user}
     else
       _ -> {:error, :invalid_or_expired}
     end
@@ -158,17 +161,21 @@ defmodule HabitTracker.Accounts do
   def update_user_email(user, token) do
     context = "change:#{user.email}"
 
-    Repo.transact(fn ->
+    Repo.transaction(fn ->
       with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
            %UserToken{sent_to: email} <- Repo.one(query),
            {:ok, user} <- Repo.update(User.email_changeset(user, %{email: email})),
            {_count, _result} <-
              Repo.delete_all(from(UserToken, where: [user_id: ^user.id, context: ^context])) do
-        {:ok, user}
+        user
       else
-        _ -> {:error, :transaction_aborted}
+        _ -> Repo.rollback(:transaction_aborted)
       end
     end)
+    |> case do
+      {:ok, user} -> {:ok, user}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   @doc """
@@ -277,8 +284,15 @@ defmodule HabitTracker.Accounts do
   def reset_user_password(user, attrs) do
     user
     |> User.password_changeset(attrs)
+    |> maybe_confirm_user()
     |> update_user_and_delete_all_tokens()
   end
+
+  defp maybe_confirm_user(%Ecto.Changeset{data: %User{confirmed_at: nil}} = changeset) do
+    Ecto.Changeset.change(changeset, confirmed_at: DateTime.utc_now(:second))
+  end
+
+  defp maybe_confirm_user(changeset), do: changeset
 
   @doc """
   Deletes the signed token with the given context.
@@ -335,15 +349,23 @@ defmodule HabitTracker.Accounts do
   ## Token helper
 
   defp update_user_and_delete_all_tokens(changeset) do
-    Repo.transact(fn ->
-      with {:ok, user} <- Repo.update(changeset) do
-        tokens_to_expire =
-          Repo.all(from t in UserToken, where: t.user_id == ^user.id)
+    Repo.transaction(fn ->
+      case Repo.update(changeset) do
+        {:ok, user} ->
+          tokens_to_expire =
+            Repo.all(from t in UserToken, where: t.user_id == ^user.id)
 
-        Repo.delete_all(from(t in UserToken, where: t.id in ^Enum.map(tokens_to_expire, & &1.id)))
+          Repo.delete_all(from(t in UserToken, where: t.id in ^Enum.map(tokens_to_expire, & &1.id)))
 
-        {:ok, {user, tokens_to_expire}}
+          {user, tokens_to_expire}
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
       end
     end)
+    |> case do
+      {:ok, {user, tokens_to_expire}} -> {:ok, {user, tokens_to_expire}}
+      {:error, changeset} -> {:error, changeset}
+    end
   end
 end

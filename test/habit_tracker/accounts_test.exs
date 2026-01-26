@@ -268,6 +268,21 @@ defmodule HabitTracker.AccountsTest do
     end
   end
 
+  describe "reset_user_password/2" do
+    test "confirms an unconfirmed user and updates the password" do
+      user = unconfirmed_user_fixture()
+
+      {:ok, {updated_user, _expired_tokens}} =
+        Accounts.reset_user_password(user, %{
+          password: "new valid password",
+          password_confirmation: "new valid password"
+        })
+
+      assert updated_user.confirmed_at
+      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+    end
+  end
+
   describe "generate_user_session_token/1" do
     setup do
       %{user: user_fixture()}

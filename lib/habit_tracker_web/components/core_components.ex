@@ -2,28 +2,22 @@ defmodule HabitTrackerWeb.CoreComponents do
   @moduledoc """
   Provides core UI components.
 
-  At first glance, this module may seem daunting, but its goal is to provide
-  core building blocks for your application, such as tables, forms, and
-  inputs. The components consist mostly of markup and are well-documented
-  with doc strings and declarative assigns. You may customize and style
-  them in any way you want, based on your application growth and needs.
+  This module provides the single source of truth for UI styling across the entire
+  application. All components use a unified design system with consistent colors,
+  spacing, typography, and interaction patterns.
 
-  The foundation for styling is Tailwind CSS, a utility-first CSS framework,
-  augmented with daisyUI, a Tailwind CSS plugin that provides UI components
-  and themes. Here are useful references:
+  The design system is built on:
 
-    * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
-      started and see the available components.
+    * [Tailwind CSS](https://tailwindcss.com) - utility-first CSS framework for
+      layout, sizing, flexbox, grid, and spacing.
 
-    * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
-      we build on. You will use it for layout, sizing, flexbox, grid, and
-      spacing.
-
-    * [Heroicons](https://heroicons.com) - see `icon/1` for usage.
+    * [Heroicons](https://heroicons.com) - icon system, see `icon/1` for usage.
 
     * [Phoenix.Component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html) -
       the component system used by Phoenix. Some components, such as `<.link>`
       and `<.form>`, are defined there.
+
+  Design tokens and custom styles are defined in `assets/css/app.css`.
 
   """
   use Phoenix.Component
@@ -56,23 +50,22 @@ defmodule HabitTrackerWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="fixed top-4 right-4 z-50 max-w-md animate-in slide-in-from-right"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
+        "flex items-start gap-3 px-6 py-4 rounded-xl shadow-2xl backdrop-blur-sm border-2",
+        @kind == :info && "bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-800 dark:text-blue-400",
+        @kind == :error && "bg-red-50 dark:bg-red-900/20 border-red-500 text-red-800 dark:text-red-400"
       ]}>
         <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
-        <div>
-          <p :if={@title} class="font-semibold">{@title}</p>
-          <p>{msg}</p>
+        <div class="flex-1">
+          <p :if={@title} class="font-semibold mb-1">{@title}</p>
+          <p class="text-sm">{msg}</p>
         </div>
-        <div class="flex-1" />
-        <button type="button" class="group self-start cursor-pointer" aria-label={gettext("close")}>
-          <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
+        <button type="button" class="group shrink-0 cursor-pointer hover:opacity-70 transition-opacity" aria-label={gettext("close")}>
+          <.icon name="hero-x-mark" class="size-5" />
         </button>
       </div>
     </div>
@@ -85,20 +78,27 @@ defmodule HabitTrackerWeb.CoreComponents do
   ## Examples
 
       <.button>Send!</.button>
-      <.button phx-click="go" variant="primary">Send!</.button>
+      <.button variant="primary">Send!</.button>
+      <.button variant="secondary">Cancel</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
   attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
   attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :variant, :string, values: ~w(primary secondary success danger), default: "primary"
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
+    variants = %{
+      "primary" => "btn-primary",
+      "secondary" => "btn-secondary",
+      "success" => "btn-success",
+      "danger" => "btn-danger"
+    }
 
     assigns =
       assign_new(assigns, :class, fn ->
-        ["btn", Map.fetch!(variants, assigns[:variant])]
+        variant = Map.get(assigns, :variant, "primary")
+        [Map.get(variants, variant, "btn-primary")]
       end)
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
@@ -205,8 +205,8 @@ defmodule HabitTrackerWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="fieldset mb-2">
-      <label>
+    <div class="mb-4">
+      <label class="flex items-center gap-3 cursor-pointer">
         <input
           type="hidden"
           name={@name}
@@ -214,17 +214,16 @@ defmodule HabitTrackerWeb.CoreComponents do
           disabled={@rest[:disabled]}
           form={@rest[:form]}
         />
-        <span class="label">
-          <input
-            type="checkbox"
-            id={@id}
-            name={@name}
-            value="true"
-            checked={@checked}
-            class={@class || "checkbox checkbox-sm"}
-            {@rest}
-          />{@label}
-        </span>
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class={@class || "w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"}
+          {@rest}
+        />
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{@label}</span>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -233,13 +232,16 @@ defmodule HabitTrackerWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
-      <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+    <div class="mb-4">
+      <label class="block">
+        <span :if={@label} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[
+            @class || "w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900/30 transition-all",
+            @errors != [] && (@error_class || "border-red-500 focus:border-red-500 focus:ring-red-200")
+          ]}
           multiple={@multiple}
           {@rest}
         >
@@ -254,15 +256,15 @@ defmodule HabitTrackerWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
-      <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+    <div class="mb-4">
+      <label class="block">
+        <span :if={@label} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{@label}</span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
+            @class || "w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900/30 transition-all resize-none",
+            @errors != [] && (@error_class || "border-red-500 focus:border-red-500 focus:ring-red-200")
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -275,17 +277,17 @@ defmodule HabitTrackerWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
-      <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+    <div class="mb-4">
+      <label class="block">
+        <span :if={@label} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
+            @class || "w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900/30 transition-all",
+            @errors != [] && (@error_class || "border-red-500 focus:border-red-500 focus:ring-red-200")
           ]}
           {@rest}
         />
@@ -298,8 +300,8 @@ defmodule HabitTrackerWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
-      <.icon name="hero-exclamation-circle" class="size-5" />
+    <p class="mt-2 flex gap-2 items-center text-sm text-red-600 dark:text-red-400">
+      <.icon name="hero-exclamation-circle" class="size-4 shrink-0" />
       {render_slot(@inner_block)}
     </p>
     """
@@ -314,12 +316,12 @@ defmodule HabitTrackerWeb.CoreComponents do
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
+    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-6"]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="mt-2 text-sm text-gray-600 dark:text-gray-400">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -360,34 +362,38 @@ defmodule HabitTrackerWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="table table-zebra">
-      <thead>
-        <tr>
-          <th :for={col <- @col}>{col[:label]}</th>
-          <th :if={@action != []}>
-            <span class="sr-only">{gettext("Actions")}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
-        <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
-          <td
-            :for={col <- @col}
-            phx-click={@row_click && @row_click.(row)}
-            class={@row_click && "hover:cursor-pointer"}
-          >
-            {render_slot(col, @row_item.(row))}
-          </td>
-          <td :if={@action != []} class="w-0 font-semibold">
-            <div class="flex gap-4">
-              <%= for action <- @action do %>
-                {render_slot(action, @row_item.(row))}
-              <% end %>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+      <table class="w-full">
+        <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <tr>
+            <th :for={col <- @col} class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              {col[:label]}
+            </th>
+            <th :if={@action != []} class="px-6 py-3 text-right">
+              <span class="sr-only">{gettext("Actions")}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"} class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <td
+              :for={col <- @col}
+              phx-click={@row_click && @row_click.(row)}
+              class={["px-6 py-4 text-sm text-gray-900 dark:text-gray-100", @row_click && "hover:cursor-pointer"]}
+            >
+              {render_slot(col, @row_item.(row))}
+            </td>
+            <td :if={@action != []} class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+              <div class="flex gap-3 justify-end">
+                <%= for action <- @action do %>
+                  {render_slot(action, @row_item.(row))}
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     """
   end
 
@@ -407,14 +413,12 @@ defmodule HabitTrackerWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="list">
-      <li :for={item <- @item} class="list-row">
-        <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
-          <div>{render_slot(item)}</div>
-        </div>
-      </li>
-    </ul>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+      <div :for={item <- @item} class="px-6 py-4">
+        <dt class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{item.title}</dt>
+        <dd class="text-sm text-gray-900 dark:text-gray-100">{render_slot(item)}</dd>
+      </div>
+    </div>
     """
   end
 

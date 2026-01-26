@@ -7,23 +7,23 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-12">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4 py-12">
       <div class="max-w-md w-full space-y-8">
         <%!-- Logo/Header --%>
         <div class="text-center">
-          <div class="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-4">
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
             <.icon name="hero-key" class="w-8 h-8 text-white" />
           </div>
-          <h2 class="text-3xl font-bold text-gray-900">
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-3">
             Set a new password
           </h2>
-          <p class="mt-2 text-sm text-gray-600">
+          <p class="text-base text-gray-600">
             Create a strong password for your account
           </p>
         </div>
 
         <%!-- Reset Password Form --%>
-        <div class="bg-white shadow-xl rounded-2xl p-8">
+        <div class="bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl p-8 border border-gray-100">
           <.form
             for={@form}
             id="reset_password_form"
@@ -32,7 +32,7 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
             class="space-y-6"
           >
             <div>
-              <label for="new_password" class="block text-sm font-medium text-gray-700 mb-2">
+              <label for="new_password" class="block text-sm font-semibold text-gray-900 mb-2">
                 New password
               </label>
               <input
@@ -43,7 +43,7 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
                 autocomplete="new-password"
                 required
                 phx-mounted={JS.focus()}
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
                 placeholder="••••••••"
                 style="font-size: 16px;"
               />
@@ -53,7 +53,7 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
             </div>
 
             <div>
-              <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
+              <label for="confirm_password" class="block text-sm font-semibold text-gray-900 mb-2">
                 Confirm new password
               </label>
               <input
@@ -63,7 +63,7 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
                 value={@form[:password_confirmation].value}
                 autocomplete="new-password"
                 required
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
                 placeholder="••••••••"
                 style="font-size: 16px;"
               />
@@ -73,7 +73,7 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
               <button
                 type="submit"
                 phx-disable-with="Resetting..."
-                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:opacity-90 transition-all transform hover:scale-105"
               >
                 Reset password
               </button>
@@ -82,11 +82,11 @@ defmodule HabitTrackerWeb.UserLive.ResetPassword do
         </div>
 
         <%!-- Security Tips --%>
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
           <div class="flex">
             <.icon name="hero-shield-check" class="h-5 w-5 text-green-400 mr-3 flex-shrink-0" />
             <div class="text-sm text-green-700">
-              <p class="font-medium">Password tips:</p>
+              <p class="font-semibold">Password tips:</p>
               <ul class="mt-1 list-disc list-inside space-y-1">
                 <li>Use at least 8 characters</li>
                 <li>Mix letters, numbers, and symbols</li>

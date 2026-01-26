@@ -79,7 +79,7 @@ defmodule HabitTrackerWeb.AdminLive.Users do
                   name="search[query]"
                   value={@search_query}
                   placeholder="Search by email or user ID..."
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-gray-900 bg-white placeholder-gray-400"
+                  class="block w-full rounded-xl border-2 border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 placeholder-gray-400"
                   phx-debounce="300"
                 />
               </div>
@@ -87,7 +87,7 @@ defmodule HabitTrackerWeb.AdminLive.Users do
                 <button
                   type="button"
                   phx-click="clear_search"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-sm font-semibold rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 transition-all"
                 >
                   Clear
                 </button>
@@ -133,8 +133,8 @@ defmodule HabitTrackerWeb.AdminLive.Users do
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-3">
                         <div class="flex-shrink-0">
-                          <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                            <.icon name="hero-user" class="h-6 w-6 text-indigo-600" />
+                          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20 flex items-center justify-center">
+                            <.icon name="hero-user" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">

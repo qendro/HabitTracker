@@ -105,7 +105,7 @@ defmodule HabitTrackerWeb.TodayLive do
   end
 
   @impl true
-  def handle_event("toggle_habit", %{"habit-id" => habit_id}, socket) do
+  def handle_event("toggle_habit", %{"habit-id" => habit_id, "value" => _value}, socket) do
     # Check readonly mode
     if readonly_mode?(socket) do
       {:noreply, put_flash(socket, :error, "Cannot modify habits in read-only mode")}
@@ -134,24 +134,13 @@ defmodule HabitTrackerWeb.TodayLive do
             {:noreply,
              socket
              |> assign(:habits_with_progress, habits_with_progress)
-             |> assign(:completion_summary, %{completed: completed, total: total})
-             |> put_flash(:info, "Habit updated")}
+             |> assign(:completion_summary, %{completed: completed, total: total})}
           
           {:error, _changeset} ->
-            # Rollback - reload from database
-            habits_with_progress = Tracker.today_dashboard(socket.assigns.current_scope.user, socket.assigns.selected_date)
-            
-            total = length(habits_with_progress)
-            completed = Enum.count(habits_with_progress, & &1.is_complete)
-            
-            {:noreply, 
-             socket
-             |> assign(:habits_with_progress, habits_with_progress)
-             |> assign(:completion_summary, %{completed: completed, total: total})
-             |> put_flash(:error, "Failed to update habit")}
+            {:noreply, put_flash(socket, :error, "Failed to update habit")}
         end
       else
-        {:noreply, socket}
+        {:noreply, put_flash(socket, :error, "Habit not found")}
       end
     end
   end
@@ -170,11 +159,11 @@ defmodule HabitTrackerWeb.TodayLive do
       if habit_with_progress do
         habit = habit_with_progress.habit
         
-        # Parse value based on habit type
-        attrs = case habit.type do
-          :numeric ->
-            case Decimal.parse(value) do
-              {decimal_value, _} -> %{numeric_value: decimal_value}
+      # Parse value based on habit type
+      attrs = case habit.type do
+        :numeric ->
+            case Integer.parse(value) do
+              {int_value, _} -> %{numeric_value: int_value}
               :error -> nil
             end
           

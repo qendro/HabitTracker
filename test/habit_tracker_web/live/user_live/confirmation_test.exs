@@ -18,9 +18,11 @@ defmodule HabitTrackerWeb.UserLive.ConfirmationTest do
           Accounts.deliver_user_confirmation_instructions(user, url)
         end)
 
-      {:ok, _lv, html} = live(conn, ~p"/users/confirm/#{token}")
-
-      assert html =~ "Account confirmed"
+      {:error, redirect} = live(conn, ~p"/users/confirm/#{token}")
+      assert {:live_redirect, %{to: path, flash: flash}} = redirect
+      assert path == ~p"/users/log-in"
+      assert %{"info" => message} = flash
+      assert message == "Account confirmed. Please sign in."
       assert Accounts.get_user!(user.id).confirmed_at
     end
 

@@ -20,6 +20,16 @@ defmodule HabitTracker.Admin.Admin do
     |> validate_password(opts)
   end
 
+  @doc """
+  A changeset for changing the admin password.
+  """
+  def password_changeset(admin, attrs, opts \\ []) do
+    admin
+    |> cast(attrs, [:password])
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password(opts)
+  end
+
   defp validate_email(changeset, opts) do
     changeset =
       changeset

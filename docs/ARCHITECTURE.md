@@ -143,6 +143,7 @@ CREATE TABLE admins_tokens (
   admin_id BIGINT NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
   token BYTEA NOT NULL,
   context VARCHAR(255) NOT NULL,
+  sent_to VARCHAR(255),
   inserted_at TIMESTAMP NOT NULL
 );
 

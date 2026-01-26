@@ -7,7 +7,9 @@ defmodule HabitTracker.Admin do
 
   alias HabitTracker.Admin.Admin
   alias HabitTracker.Admin.AdminToken
+  alias HabitTracker.Admin.AdminNotifier
   alias HabitTracker.Repo
+  alias HabitTracker.Security
 
   @doc """
   Gets an admin by email.
@@ -68,6 +70,70 @@ defmodule HabitTracker.Admin do
   def delete_admin_session_token(token) do
     Repo.delete_all(from(AdminToken, where: [token: ^token, context: "session"]))
     :ok
+  end
+
+  @doc """
+  Delivers the reset password instructions to the given admin.
+  """
+  def deliver_admin_reset_password_instructions(%Admin{} = admin, reset_password_url_fun)
+      when is_function(reset_password_url_fun, 1) do
+    Security.log_event(:password_reset_request, %{
+      email: admin.email
+    })
+
+    {encoded_token, admin_token} = AdminToken.build_email_token(admin, "reset_password")
+    Repo.insert!(admin_token)
+    AdminNotifier.deliver_reset_password_instructions(admin, reset_password_url_fun.(encoded_token))
+  end
+
+  @doc """
+  Gets the admin by reset password token.
+  """
+  def get_admin_by_reset_password_token(token) do
+    with {:ok, query} <- AdminToken.verify_email_token_query(token, "reset_password"),
+         %Admin{} = admin <- Repo.one(query) do
+      admin
+    else
+      _ -> nil
+    end
+  end
+
+  @doc """
+  Returns a changeset for changing the admin password.
+  """
+  def change_admin_password(admin, attrs \\ %{}, opts \\ []) do
+    Admin.password_changeset(admin, attrs, opts)
+  end
+
+  @doc """
+  Resets the admin password.
+  """
+  def reset_admin_password(admin, attrs) do
+    admin
+    |> Admin.password_changeset(attrs)
+    |> update_admin_and_delete_all_tokens()
+  end
+
+  defp update_admin_and_delete_all_tokens(changeset) do
+    Repo.transaction(fn ->
+      case Repo.update(changeset) do
+        {:ok, admin} ->
+          tokens_to_expire = Repo.all(from t in AdminToken, where: t.admin_id == ^admin.id)
+
+          Repo.delete_all(
+            from(t in AdminToken, where: t.id in ^Enum.map(tokens_to_expire, & &1.id))
+          )
+
+          {admin, tokens_to_expire}
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+    |> case do
+      {:ok, {admin, tokens_to_expire}} -> {:ok, {admin, tokens_to_expire}}
+      {:error, changeset} -> {:error, changeset}
+    end
   end
 
   # User Management functions
@@ -202,6 +268,8 @@ defmodule HabitTracker.Admin do
   Logs the action to admin_actions table.
   """
   def force_password_reset(admin, user) do
+    alias HabitTracker.Accounts.UserNotifier
+    
     with_audit_log(admin, "force_password_reset", user.id, fn ->
       # Delete all existing tokens for this user
       Repo.delete_all(from(t in UserToken, where: t.user_id == ^user.id))
@@ -210,8 +278,13 @@ defmodule HabitTracker.Admin do
       {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
       Repo.insert!(user_token)
 
-      # In a real implementation, we would send an email here
-      # For now, we'll just return success with the token
+      # Generate the reset URL
+      base_url = Application.get_env(:habit_tracker, :app_url, "http://localhost:4000")
+      reset_url = "#{base_url}/users/reset-password/#{encoded_token}"
+
+      # Send the password reset email
+      UserNotifier.deliver_reset_password_instructions(user, reset_url)
+
       {:ok, %{user: user, reset_token: encoded_token}}
     end)
   end

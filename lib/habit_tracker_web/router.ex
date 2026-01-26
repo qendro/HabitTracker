@@ -127,6 +127,8 @@ defmodule HabitTrackerWeb.Router do
     live_session :admin_current,
       on_mount: [{HabitTrackerWeb.AdminAuth, :mount_current_admin}] do
       live "/login", AdminLive.Login, :new
+      live "/reset-password", AdminLive.ResetPasswordRequest, :new
+      live "/reset-password/:token", AdminLive.ResetPassword, :edit
     end
 
     post "/log-in", AdminSessionController, :create

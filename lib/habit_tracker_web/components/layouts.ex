@@ -35,60 +35,13 @@ defmodule HabitTrackerWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <%!-- Skip Navigation Link for Accessibility --%>
-    <a href="#main-content" class="skip-nav">
-      Skip to main content
-    </a>
-
-    <%!-- Impersonation Banner --%>
-    <%= if Map.get(@current_scope || %{}, :readonly_mode, false) do %>
-      <div class="bg-yellow-500 text-white px-4 py-2 text-center font-medium" role="alert" aria-live="polite">
-        <div class="flex items-center justify-center gap-4">
-          <span>
-            <.icon name="hero-eye" class="w-5 h-5 inline mr-2" />
-            Viewing as <%= @current_scope.user.email %> (Read-Only Mode)
-          </span>
-          <.link
-            href={~p"/admin/stop-impersonation"}
-            method="post"
-            class="inline-flex items-center px-3 py-1 bg-white text-yellow-700 rounded-md text-sm font-medium hover:bg-yellow-50"
-            aria-label="Stop viewing as user"
-          >
-            Stop Viewing
-          </.link>
-        </div>
-      </div>
-    <% end %>
-
-    <header class="navbar px-4 sm:px-6 lg:px-8" role="banner">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2" aria-label="Home">
-          <img src={~p"/images/logo.svg"} width="36" alt="HabitTracker logo" />
-          <span class="text-sm font-semibold" aria-label="Phoenix version">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <nav class="flex-none" aria-label="Main navigation">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </header>
-
-    <main class="px-4 py-20 sm:px-6 lg:px-8" id="main-content" role="main">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <%!-- This layout is deprecated - all pages should use root.html.heex branded shell --%>
+    <%!-- Keeping for backwards compatibility but redirecting to branded shell --%>
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {render_slot(@inner_block)}
       </div>
-    </main>
+    </div>
 
     <.flash_group flash={@flash} />
     """

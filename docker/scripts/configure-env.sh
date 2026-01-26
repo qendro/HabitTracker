@@ -10,18 +10,14 @@ echo "=========================================="
 echo ""
 
 # Check if required variables are set
-if [ -z "$GIGALIXIR_EMAIL" ] || [ -z "$GIGALIXIR_API_KEY" ] || [ -z "$APP_NAME" ]; then
-    echo "Error: Required environment variables not set"
-    echo "Please ensure .env.gigalixir contains:"
-    echo "  - GIGALIXIR_EMAIL"
-    echo "  - GIGALIXIR_API_KEY"
-    echo "  - APP_NAME"
+if [ -z "$APP_NAME" ]; then
+    echo "Error: APP_NAME not set"
+    echo "Please ensure .env.gigalixir contains APP_NAME"
     exit 1
 fi
 
-# Login to Gigalixir
-echo "Logging in to Gigalixir..."
-gigalixir login -e "$GIGALIXIR_EMAIL" -p "$GIGALIXIR_API_KEY" -y
+# Setup credentials
+source /app/docker/scripts/gigalixir-setup.sh
 
 # Set Resend API Key
 if [ -n "$RESEND_API_KEY" ]; then

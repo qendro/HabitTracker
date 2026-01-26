@@ -5,29 +5,47 @@ defmodule HabitTrackerWeb.AdminSessionController do
   alias HabitTracker.Accounts
   alias HabitTracker.Security
   alias HabitTrackerWeb.AdminAuth
+  alias HabitTrackerWeb.RateLimiter
 
   def create(conn, %{"admin" => %{"email" => email, "password" => password}}) do
     ip = Security.get_client_ip(conn)
 
-    if admin = Admin.get_admin_by_email_and_password(email, password) do
-      Security.log_event(:successful_login, %{
-        user_id: admin.id,
-        email: email,
-        ip: ip
-      })
+    case RateLimiter.check_login(ip) do
+      :deny ->
+        Security.log_event(:rate_limit_exceeded, %{
+          endpoint: "admin_login",
+          ip: ip,
+          identifier: email
+        })
 
-      AdminAuth.log_in_admin(conn, admin)
-    else
-      Security.log_event(:failed_login, %{
-        email: email,
-        ip: ip,
-        user_agent: Security.get_user_agent(conn)
-      })
+        conn
+        |> put_status(:too_many_requests)
+        |> put_flash(:error, "Too many login attempts. Please try again later.")
+        |> redirect(to: ~p"/admin/login")
 
-      conn
-      |> put_flash(:error, "Invalid email or password")
-      |> put_flash(:email, String.trim(email))
-      |> redirect(to: ~p"/admin/login")
+      :allow ->
+        if admin = Admin.get_admin_by_email_and_password(email, password) do
+          Security.log_event(:successful_login, %{
+            user_id: admin.id,
+            email: email,
+            ip: ip
+          })
+
+          conn
+          |> put_flash(:info, "Welcome back!")
+          |> AdminAuth.log_in_admin(admin)
+        else
+          Security.log_event(:failed_login, %{
+            email: email,
+            ip: ip,
+            user_agent: Security.get_user_agent(conn)
+          })
+
+          conn
+          |> put_flash(:error, "Invalid email or password")
+          |> put_flash(:email, String.slice(email, 0, 160))
+          |> redirect(to: ~p"/admin/login")
+        end
     end
   end
 

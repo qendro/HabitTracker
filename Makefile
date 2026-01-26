@@ -1,4 +1,4 @@
-.PHONY: help up down restart logs shell iex test migrate rollback reset setup clean build deps precommit create-admin gigalixir-setup gigalixir-create gigalixir-deploy gigalixir-migrate gigalixir-admin gigalixir-logs gigalixir-status gigalixir-shell
+.PHONY: help up down restart logs shell iex test migrate rollback reset setup clean build deps precommit create-admin gigalixir-setup gigalixir-create gigalixir-deploy gigalixir-migrate gigalixir-admin gigalixir-logs gigalixir-status gigalixir-shell gigalixir-config gigalixir-fix-db gigalixir-configure-env gigalixir-check-email
 
 # Docker Compose commands
 DC = docker compose -f docker/docker-compose.yml
@@ -34,10 +34,12 @@ help:
 	@echo "  make gigalixir-deploy   - Deploy to Gigalixir"
 	@echo "  make gigalixir-migrate  - Run migrations on Gigalixir"
 	@echo "  make gigalixir-admin    - Create admin account on Gigalixir"
+	@echo "  make gigalixir-configure-env - Configure app env vars on Gigalixir"
+	@echo "  make gigalixir-check-email   - Verify email configuration"
 	@echo "  make gigalixir-fix-db   - Fix database connection pool issues"
 	@echo "  make gigalixir-logs     - View Gigalixir app logs"
 	@echo "  make gigalixir-status   - Check Gigalixir app status"
-	@echo "  make gigalixir-config   - View current configuration"
+	@echo "  make gigalixir-config   - View app + DB status and config"
 	@echo "  make gigalixir-domain   - Setup custom domain"
 	@echo "  make gigalixir-domains  - List configured domains"
 	@echo "  make gigalixir-restart  - Restart app"
@@ -154,6 +156,22 @@ gigalixir-admin:
 	fi
 	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/create-admin.sh
 
+gigalixir-configure-env:
+	@echo "Configuring Gigalixir environment variables..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/configure-env.sh
+
+gigalixir-check-email:
+	@echo "Checking Gigalixir email configuration..."
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/check-email-config.sh
+
 gigalixir-logs:
 	@if [ ! -f .env.gigalixir ]; then \
 		echo "Error: .env.gigalixir file not found"; \
@@ -202,8 +220,16 @@ gigalixir-restart:
 
 gigalixir-config:
 	@echo "Viewing current configuration..."
-	@./scripts/check-production-config.sh
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/status.sh
 
 gigalixir-fix-db:
 	@echo "Fixing database connection pool configuration..."
-	@./scripts/fix-production-db.sh
+	@if [ ! -f .env.gigalixir ]; then \
+		echo "Error: .env.gigalixir file not found"; \
+		exit 1; \
+	fi
+	@export $$(grep -v '^#' .env.gigalixir | xargs) && $(DC_GIGALIXIR) run --rm gigalixir bash /app/docker/scripts/set-pool-size.sh

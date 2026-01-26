@@ -14,9 +14,9 @@ services:
       - gigalixir-config:/root/.gigalixir
     working_dir: /app
     environment:
-      - GIGALIXIR_EMAIL=${GIGALIXIR_EMAIL:-habbits.xyz@gmail.com}
+      - GIGALIXIR_EMAIL=${GIGALIXIR_EMAIL:-}
       - GIGALIXIR_API_KEY=${GIGALIXIR_API_KEY:-}
-      - APP_NAME=${APP_NAME:-habit-tracker-prod}
+      - APP_NAME=${APP_NAME:-}
     stdin_open: true
     tty: true
 
