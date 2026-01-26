@@ -56,7 +56,7 @@ defmodule HabitTrackerWeb.AdminLive.ResetPasswordRequest do
 
           <div class="mt-6 text-center">
             <.link navigate={~p"/admin/login"} class="text-sm font-semibold text-blue-600 hover:text-cyan-600 transition-colors">
-              <- Back to admin login
+              &larr; Back to admin login
             </.link>
           </div>
         </div>
