@@ -3,7 +3,6 @@ defmodule HabitTrackerWeb.JournalLive do
 
   alias HabitTracker.Journal
   alias HabitTracker.Journal.JournalEntry
-  alias HabitTracker.Tracker.Time
   alias HabitTrackerWeb.HabitComponents
 
   @impl true
@@ -197,7 +196,7 @@ defmodule HabitTrackerWeb.JournalLive do
               <.button
                 :if={@entry}
                 type="button"
-                variant="danger"
+                class="btn-danger"
                 phx-click="delete_entry"
                 phx-confirm="Delete this journal entry?"
                 disabled={@readonly_mode}
@@ -224,7 +223,7 @@ defmodule HabitTrackerWeb.JournalLive do
     entry = Journal.get_entry_for_date(socket.assigns.user, selected_date)
     base_entry = entry || Journal.blank_entry(socket.assigns.user, selected_date)
     changeset = Journal.change_entry(base_entry, %{})
-    today = Time.today_in_timezone(socket.assigns.timezone)
+    today = today_in_timezone(socket.assigns.timezone)
     is_today = Date.compare(selected_date, today) == :eq
 
     socket
@@ -241,11 +240,44 @@ defmodule HabitTrackerWeb.JournalLive do
   end
 
   defp parse_date(date_param, timezone) do
-    case Time.normalize_local_date(date_param, timezone) do
+    case normalize_local_date(date_param, timezone) do
       {:ok, date} -> date
-      {:error, _} -> Time.today_in_timezone(timezone)
+      {:error, _} -> today_in_timezone(timezone)
     end
   end
+
+  defp today_in_timezone(timezone) do
+    case DateTime.shift_zone(DateTime.utc_now(:second), timezone) do
+      {:ok, shifted} -> DateTime.to_date(shifted)
+      _ -> DateTime.utc_now(:second) |> DateTime.to_date()
+    end
+  end
+
+  defp normalize_local_date(%Date{} = date, _timezone), do: {:ok, date}
+
+  defp normalize_local_date(%DateTime{} = dt, timezone) do
+    case DateTime.shift_zone(dt, timezone) do
+      {:ok, shifted} -> {:ok, DateTime.to_date(shifted)}
+      _ -> {:ok, DateTime.to_date(dt)}
+    end
+  end
+
+  defp normalize_local_date(%NaiveDateTime{} = dt, timezone) do
+    case DateTime.from_naive(dt, timezone) do
+      {:ok, zoned} -> {:ok, DateTime.to_date(zoned)}
+      _ -> {:ok, NaiveDateTime.to_date(dt)}
+    end
+  end
+
+  defp normalize_local_date(date, _timezone) when is_binary(date) do
+    case Date.from_iso8601(date) do
+      {:ok, parsed} -> {:ok, parsed}
+      _ -> {:error, :invalid_date}
+    end
+  end
+
+  defp normalize_local_date(nil, timezone), do: {:ok, today_in_timezone(timezone)}
+  defp normalize_local_date(_date, _timezone), do: {:error, :invalid_date}
 
   defp format_updated_at(nil, _timezone), do: ""
 
