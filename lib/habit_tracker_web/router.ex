@@ -85,7 +85,11 @@ defmodule HabitTrackerWeb.Router do
       # Today dashboard routes
       live "/app/today", TodayLive, :index
       live "/app/day/:date", TodayLive, :show
-      
+
+      # Journal routes
+      live "/app/journal", JournalLive, :index
+      live "/app/journal/:date", JournalLive, :show
+
       # Habit management routes
       live "/app/habits", HabitsLive, :index
       live "/app/habits/new", HabitFormLive, :new

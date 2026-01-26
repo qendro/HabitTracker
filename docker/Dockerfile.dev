@@ -1,5 +1,5 @@
 # Development Dockerfile
-FROM elixir:1.15-alpine
+FROM elixir:1.19.5-otp-28-alpine
 
 # Install dependencies
 RUN apk add --no-cache \

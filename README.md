@@ -20,15 +20,16 @@ Track your daily habits, build streaks, and achieve your goals with an intuitive
 ```
 habit-tracker/
 ├── assets/              # Frontend assets (JS, CSS)
-├── bin/                 # Deployment scripts
 ├── config/              # Application configuration
 ├── docker/              # Docker configuration files
 │   ├── docker-compose.yml
 │   ├── Dockerfile
 │   └── Dockerfile.dev
 ├── docs/                # Documentation
+│   ├── README.md
 │   ├── ARCHITECTURE.md
-│   └── DEVELOPMENT.md
+│   ├── DEVELOPMENT.md
+│   └── DEPLOYMENT.md
 ├── lib/
 │   ├── habit_tracker/           # Business logic contexts
 │   │   ├── accounts/            # User authentication
@@ -43,7 +44,7 @@ habit-tracker/
 ├── priv/
 │   ├── repo/migrations/         # Database migrations
 │   └── static/                  # Static assets
-├── scripts/             # Helper scripts
+├── scripts/             # Helper scripts (local)
 │   └── create_admin.sh
 ├── test/                # Test files
 └── mix.exs              # Project configuration
@@ -51,12 +52,15 @@ habit-tracker/
 
 ## 🚀 Quick Start
 
-**This project uses Docker exclusively - no local Elixir/Node.js installation required.**
+**This project is Docker-first - no local Elixir/Node.js installation required.**
 
 ### Using Docker (Recommended)
 
 ```bash
-# Start the application
+# First-time setup (starts services + DB setup)
+make setup
+
+# Daily use
 make up
 
 # In another terminal, create an admin account
@@ -65,11 +69,13 @@ make create-admin
 
 The application will be available at http://localhost:4000
 
-**See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for deployment instructions.**
+**See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deployment instructions.**
 
 ## 📚 Documentation
 
-- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Complete development and deployment guide
+- **[docs/README.md](docs/README.md)** - Documentation index
+- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Local development workflow
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Gigalixir deployment guide
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
 - **[Docker README](docker/README.md)** - Docker setup details
 
@@ -77,14 +83,14 @@ The application will be available at http://localhost:4000
 
 Environment variables are configured via:
 - **Development**: `.env` file (copy from `.env.dev` template)
-- **Production**: Gigalixir config (see DEVELOPMENT.md)
+- **Production**: `.env.gigalixir` (copy from `.env.gigalixir.example`) + Gigalixir config
 
 ## 🏗️ Architecture
 
 **Stack:**
-- Backend: Elixir 1.15+ with Phoenix 1.8+ and LiveView
+- Backend: Elixir 1.19+ with Phoenix 1.8+ and LiveView
 - Database: PostgreSQL 15+
-- Styling: Tailwind CSS 4.x
+- Styling: Tailwind CSS (via mix tooling)
 - Email: Resend API via Swoosh
 - Background Jobs: Oban
 - Deployment: Gigalixir
@@ -102,13 +108,13 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical document
 
 ```bash
 # With Docker
-docker compose -f docker/docker-compose.yml run --rm test
+make test
 
 # Without Docker
 mix test
 
 # Run precommit checks
-mix precommit
+make precommit
 ```
 
 ## 🚢 Deployment
@@ -129,7 +135,7 @@ make gigalixir-migrate
 make gigalixir-admin
 ```
 
-See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for complete deployment instructions.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment instructions.
 
 ## 🔒 Security
 
@@ -163,6 +169,7 @@ make gigalixir-deploy  # Deploy to production
 
 **Documentation:**
 - Development: `docs/DEVELOPMENT.md`
+- Deployment: `docs/DEPLOYMENT.md`
 - Architecture: `docs/ARCHITECTURE.md`
 - Docker: `docker/README.md`
 

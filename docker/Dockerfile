@@ -9,9 +9,9 @@
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
 #   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20240904-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.15.7-erlang-26.1.2-debian-bullseye-20240904-slim
+#   - Ex: hexpm/elixir:1.19.5-erlang-28.3-debian-bullseye-20240904-slim
 #
-FROM elixir:1.15-alpine AS builder
+FROM elixir:1.19.5-otp-28-alpine AS builder
 
 # install build dependencies
 RUN apk add --no-cache build-base git curl nodejs npm python3

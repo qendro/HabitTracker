@@ -1,6 +1,6 @@
 # Gigalixir Deployment Container
 # Self-contained environment for deploying to Gigalixir
-FROM elixir:1.15-alpine
+FROM elixir:1.19.5-otp-28-alpine
 
 # Install all required tools
 RUN apk add --no-cache \
