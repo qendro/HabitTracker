@@ -24,9 +24,7 @@ defmodule HabitTracker.Application do
     opts = [strategy: :one_for_one, name: HabitTracker.Supervisor]
     {:ok, pid} = Supervisor.start_link(children, opts)
 
-    if config_env() == :prod do
-      maybe_bootstrap_admin()
-    end
+    maybe_bootstrap_admin()
 
     {:ok, pid}
   end
