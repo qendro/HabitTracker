@@ -5,6 +5,8 @@ defmodule HabitTracker.Application do
 
   use Application
 
+  require Logger
+
   @impl true
   def start(_type, _args) do
     # Completely skip Oban in production to save database connections
@@ -20,7 +22,13 @@ defmodule HabitTracker.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: HabitTracker.Supervisor]
-    Supervisor.start_link(children, opts)
+    {:ok, pid} = Supervisor.start_link(children, opts)
+
+    if config_env() == :prod do
+      maybe_bootstrap_admin()
+    end
+
+    {:ok, pid}
   end
 
   # Tell Phoenix to update the endpoint configuration
@@ -29,5 +37,29 @@ defmodule HabitTracker.Application do
   def config_change(changed, _new, removed) do
     HabitTrackerWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp maybe_bootstrap_admin do
+    email = System.get_env("ADMIN_BOOTSTRAP_EMAIL")
+    password = System.get_env("ADMIN_BOOTSTRAP_PASSWORD")
+
+    if email && password do
+      case HabitTracker.Admin.get_admin_by_email(email) do
+        nil ->
+          case HabitTracker.Admin.register_admin(%{email: email, password: password}) do
+            {:ok, _admin} ->
+              Logger.info("Bootstrap admin created", email: email)
+
+            {:error, changeset} ->
+              Logger.error("Bootstrap admin creation failed",
+                email: email,
+                errors: inspect(changeset.errors)
+              )
+          end
+
+        _admin ->
+          Logger.info("Bootstrap admin already exists", email: email)
+      end
+    end
   end
 end
