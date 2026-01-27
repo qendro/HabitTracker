@@ -41,7 +41,10 @@ npm-debug.log
 .env.development
 .env.production.local
 .env.gigalixir
+.env.northflank
 docker/docker-compose.override.yml
+.northflank_token
+.northflank_secret
 
 # IDE
 .idea/

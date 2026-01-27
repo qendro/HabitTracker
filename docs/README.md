@@ -3,7 +3,7 @@
 ## Core Docs
 
 - [Development Guide](DEVELOPMENT.md)
-- [Deployment Guide (Gigalixir)](DEPLOYMENT.md)
+- [Deployment Guide (Docker / Northflank)](DEPLOYMENT.md)
 - [Architecture](ARCHITECTURE.md)
 
 ## Supporting Docs

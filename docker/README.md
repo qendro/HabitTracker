@@ -11,6 +11,13 @@ make create-admin
 
 Visit http://localhost:4000
 
+## Northflank Deployment
+
+Northflank can build directly from `docker/Dockerfile`.
+
+See `docs/DEPLOYMENT.md` for the full Docker-first deployment flow,
+including required environment variables and migrations.
+
 ## Gigalixir Deployment
 
 All Gigalixir operations run inside a Docker container. No local Gigalixir CLI required.

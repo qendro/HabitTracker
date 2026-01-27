@@ -52,12 +52,11 @@ RUN mix compile
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
-COPY rel rel
 RUN mix release
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
-FROM alpine:3.18
+FROM alpine:3.23.2
 
 RUN apk add --no-cache libstdc++ openssl ncurses-libs ca-certificates bash
 
@@ -66,11 +65,17 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
+ENV PHX_SERVER="true"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/habit_tracker ./
+COPY docker/entrypoint.sh /app/entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh && chown nobody:root /app/entrypoint.sh
 
 USER nobody
+
+EXPOSE 4000
 
 # If using an environment that doesn't automatically reap zombie processes, it is
 # advised to add an init process such as tini via `apt-get install`
@@ -79,5 +84,5 @@ USER nobody
 # ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 # RUN chmod +x /tini
 # ENTRYPOINT ["/tini", "--"]
-
-CMD ["/app/bin/habit_tracker", "start"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["start"]

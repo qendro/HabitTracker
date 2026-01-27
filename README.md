@@ -75,7 +75,7 @@ The application will be available at http://localhost:4000
 
 - **[docs/README.md](docs/README.md)** - Documentation index
 - **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Local development workflow
-- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Gigalixir deployment guide
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Docker / Northflank deployment guide
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
 - **[Docker README](docker/README.md)** - Docker setup details
 
@@ -83,7 +83,7 @@ The application will be available at http://localhost:4000
 
 Environment variables are configured via:
 - **Development**: `.env` file (copy from `.env.dev` template)
-- **Production**: `.env.gigalixir` (copy from `.env.gigalixir.example`) + Gigalixir config
+- **Production**: Platform secrets / environment config (Northflank or Gigalixir)
 
 ## 🏗️ Architecture
 
@@ -93,7 +93,7 @@ Environment variables are configured via:
 - Styling: Tailwind CSS (via mix tooling)
 - Email: Resend API via Swoosh
 - Background Jobs: Oban
-- Deployment: Gigalixir
+- Deployment: Docker (Northflank / Gigalixir)
 - Error Tracking: Sentry
 
 **Key Design Principles:**
@@ -119,7 +119,11 @@ make precommit
 
 ## 🚢 Deployment
 
-This application deploys to Gigalixir using Docker:
+This application deploys via Docker.
+
+For Northflank, follow the steps in `docs/DEPLOYMENT.md`.
+
+Gigalixir commands:
 
 ```bash
 # First time setup
