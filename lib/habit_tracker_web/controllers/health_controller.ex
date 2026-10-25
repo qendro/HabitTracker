@@ -3,18 +3,18 @@ defmodule HabitTrackerWeb.HealthController do
 
   @moduledoc """
   Health check endpoint for monitoring and load balancers.
-  
+
   Returns 200 OK when the application is healthy and can connect to the database.
   Returns 503 Service Unavailable when the application is unhealthy.
   """
 
   @doc """
   Health check endpoint.
-  
+
   Checks:
   - Database connectivity
   - Application is running
-  
+
   Returns JSON with status and optional error details.
   """
   def check(conn, _params) do
@@ -52,10 +52,10 @@ defmodule HabitTrackerWeb.HealthController do
       # Simple query to check database connectivity
       case Ecto.Adapters.SQL.query(HabitTracker.Repo, "SELECT 1", []) do
         {:ok, _} -> :ok
-        {:error, error} -> {:error, "Database error: #{inspect(error)}"}
+        {:error, _error} -> {:error, "Database unavailable"}
       end
     rescue
-      error -> {:error, "Database connection failed: #{inspect(error)}"}
+      _error -> {:error, "Database unavailable"}
     end
   end
 end

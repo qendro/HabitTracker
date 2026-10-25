@@ -8,6 +8,7 @@ defmodule HabitTracker.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :timezone, :string, default: "UTC"
+    field :hide_previews, :boolean, default: false
     field :deleted_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
@@ -23,23 +24,6 @@ defmodule HabitTracker.Accounts.User do
     |> validate_email(opts)
     |> validate_password(opts)
     |> validate_timezone()
-  end
-
-  @doc """
-  A user changeset for registering or changing the email.
-
-  It requires the email to change otherwise an error is added.
-
-  ## Options
-
-    * `:validate_unique` - Set to false if you don't want to validate the
-      uniqueness of the email, useful when displaying live validations.
-      Defaults to `true`.
-  """
-  def email_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:email])
-    |> validate_email(opts)
   end
 
   defp validate_email(changeset, opts) do
@@ -129,7 +113,7 @@ defmodule HabitTracker.Accounts.User do
 
   def timezone_changeset(user, attrs) do
     user
-    |> cast(attrs, [:timezone])
+    |> cast(attrs, [:timezone, :hide_previews])
     |> validate_timezone()
   end
 

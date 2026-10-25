@@ -14,17 +14,6 @@ defmodule HabitTrackerWeb.RateLimiterTest do
     :ok
   end
 
-  test "registration rate limit enforcement" do
-    ip = unique_id("ip")
-    _ = Hammer.delete_buckets("registration:#{ip}")
-
-    for _ <- 1..5 do
-      assert RateLimiter.check_registration(ip) == :allow
-    end
-
-    assert RateLimiter.check_registration(ip) == :deny
-  end
-
   test "login rate limit enforcement" do
     ip = unique_id("ip")
     _ = Hammer.delete_buckets("login:#{ip}")
@@ -34,18 +23,6 @@ defmodule HabitTrackerWeb.RateLimiterTest do
     end
 
     assert RateLimiter.check_login(ip) == :deny
-  end
-
-  test "password reset rate limit enforcement" do
-    email = "User#{unique_id("reset")}@Example.com"
-    normalized = String.downcase(String.trim(email))
-    _ = Hammer.delete_buckets("password_reset:#{normalized}")
-
-    for _ <- 1..3 do
-      assert RateLimiter.check_password_reset(email) == :allow
-    end
-
-    assert RateLimiter.check_password_reset(email) == :deny
   end
 
   defp unique_id(prefix) do

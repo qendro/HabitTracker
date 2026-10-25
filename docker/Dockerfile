@@ -1,88 +1,26 @@
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
-# instead of Alpine to avoid DNS resolution issues in production.
-#
-# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
-# https://hub.docker.com/_/ubuntu?tab=tags
-#
-# This file is based on these images:
-#
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20240904-slim - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.19.5-erlang-28.3-debian-bullseye-20240904-slim
-#
-FROM elixir:1.19.5-otp-28-alpine AS builder
-
-# install build dependencies
-RUN apk add --no-cache build-base git curl nodejs npm python3
-
-# prepare build dir
+# syntax=docker/dockerfile:1
+ARG ELIXIR_IMAGE=hexpm/elixir:1.19.5-erlang-28.3.3-debian-trixie-20260824-slim
+FROM ${ELIXIR_IMAGE} AS builder
+ENV MIX_ENV=prod ERL_FLAGS="+S 4:4" HEX_CACERTS_PATH=/etc/ssl/certs/ca-certificates.crt
 WORKDIR /app
-
-# install hex + rebar
-RUN mix local.hex --force && \
-    mix local.rebar --force
-
-# set build ENV
-ENV MIX_ENV="prod"
-
-# install mix dependencies
-COPY mix.exs mix.lock ./
-RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
-
-# copy compile-time config files before we compile dependencies
-# to ensure any relevant config change will trigger the dependencies
-# to be re-compiled.
-COPY config/config.exs config/${MIX_ENV}.exs config/
-RUN mix deps.compile
-
-COPY priv priv
-
-COPY lib lib
-
-COPY assets assets
-
-# compile assets
-RUN mix assets.deploy
-
-# Compile the release
-RUN mix compile
-
-# Changes to config/runtime.exs don't require recompiling the code
-COPY config/runtime.exs config/
-
-RUN mix release
-
-# start a new build stage so that the final image will only contain
-# the compiled release and other runtime necessities
-FROM alpine:3.23.2
-
-RUN apk add --no-cache libstdc++ openssl ncurses-libs ca-certificates bash
-
-WORKDIR "/app"
-RUN chown nobody /app
-
-# set runner ENV
-ENV MIX_ENV="prod"
-ENV PHX_SERVER="true"
-
-# Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/habit_tracker ./
-COPY docker/entrypoint.sh /app/entrypoint.sh
-
-RUN chmod +x /app/entrypoint.sh && chown nobody:root /app/entrypoint.sh
-
-USER nobody
-
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential git ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+COPY . .
+RUN mix local.hex --force && mix local.rebar --force \
+    && mix deps.get --only prod && mix deps.compile \
+    && mix assets.deploy && mix compile --warnings-as-errors && mix release
+FROM debian:trixie-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libstdc++6 libncurses6 libssl3t64 ca-certificates imagemagick libheif1 libheif-plugin-libde265 zip curl tini \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 1000 journal && useradd --uid 1000 --gid 1000 --no-create-home journal \
+    && mkdir -p /app /data && chown -R journal:journal /app /data && chmod 700 /data
+WORKDIR /app
+COPY --from=builder --chown=journal:journal /app/_build/prod/rel/habit_tracker ./
+COPY docker/imagemagick-policy.xml /etc/ImageMagick-7/policy.xml
+ENV PHX_SERVER=true MEDIA_ROOT=/data MAGICK_TEMPORARY_PATH=/tmp ERL_FLAGS="+S 2:2" LANG=C.UTF-8
+USER journal
 EXPOSE 4000
-
-# If using an environment that doesn't automatically reap zombie processes, it is
-# advised to add an init process such as tini via `apt-get install`
-# above and adding an entrypoint. See https://github.com/krallin/tini for details
-# ENV TINI_VERSION v0.19.0
-# ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-# RUN chmod +x /tini
-# ENTRYPOINT ["/tini", "--"]
-ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["start"]
+HEALTHCHECK --interval=30s --timeout=5s CMD curl -fsS http://127.0.0.1:4000/health || exit 1
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/app/bin/habit_tracker", "start"]

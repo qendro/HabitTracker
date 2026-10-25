@@ -17,7 +17,7 @@ defmodule HabitTrackerWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+  def static_paths, do: ~w(assets images robots.txt manifest.webmanifest)
 
   def router do
     quote do
@@ -85,7 +85,6 @@ defmodule HabitTrackerWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components
-      import HabitTrackerWeb.CoreComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS

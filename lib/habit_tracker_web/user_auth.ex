@@ -230,57 +230,20 @@ defmodule HabitTrackerWeb.UserAuth do
     end
   end
 
-  def on_mount(:require_sudo_mode, _params, session, socket) do
-    socket = mount_current_scope(socket, session)
-
-    if Accounts.sudo_mode?(socket.assigns.current_scope.user, -10) do
-      {:cont, socket}
-    else
-      socket =
-        socket
-        |> Phoenix.LiveView.put_flash(:error, "You must re-authenticate to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
-
-      {:halt, socket}
-    end
-  end
-
   defp mount_current_scope(socket, session) do
     Phoenix.Component.assign_new(socket, :current_scope, fn ->
-      # Check if admin is impersonating a user
-      impersonating_user_id = session["impersonating_user_id"]
-      readonly_mode = session["readonly_mode"] || false
-
       {user, _} =
-        if impersonating_user_id do
-          # Admin is impersonating - load the impersonated user
-          user = Accounts.get_user!(impersonating_user_id)
-          {user, nil}
-        else
-          # Normal user authentication
-          if user_token = session["user_token"] do
-            Accounts.get_user_by_session_token(user_token)
-          end || {nil, nil}
-        end
+        if token = session["user_token"] do
+          Accounts.get_user_by_session_token(token)
+        end || {nil, nil}
 
-      scope = Scope.for_user(user)
-
-      # Add readonly_mode flag to scope if impersonating
-      if readonly_mode && user do
-        Map.put(scope, :readonly_mode, true)
-      else
-        scope
-      end
+      Scope.for_user(user)
     end)
   end
 
   @doc "Returns the path to redirect to after log in."
   # the user was already logged in, redirect to settings
-  def signed_in_path(%Plug.Conn{assigns: %{current_scope: %Scope{user: %Accounts.User{}}}}) do
-    ~p"/users/settings"
-  end
-
-  def signed_in_path(_), do: ~p"/"
+  def signed_in_path(_), do: ~p"/app/today"
 
   @doc """
   Plug for routes that require the user to be authenticated.

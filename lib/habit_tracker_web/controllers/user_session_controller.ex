@@ -42,8 +42,7 @@ defmodule HabitTrackerWeb.UserSessionController do
           # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
           Security.log_event(:failed_login, %{
             email: email,
-            ip: ip,
-            user_agent: Security.get_user_agent(conn)
+            ip: ip
           })
 
           conn
@@ -54,24 +53,28 @@ defmodule HabitTrackerWeb.UserSessionController do
     end
   end
 
-  def update_password(conn, %{"user" => user_params} = params) do
+  def update_password(conn, %{"user" => user_params}) do
     user = conn.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
-    {:ok, {updated_user, expired_tokens}} = Accounts.update_user_password(user, user_params)
 
-    # Log password change
-    Security.log_event(:password_changed, %{
-      user_id: user.id,
-      ip: Security.get_client_ip(conn)
-    })
+    if Accounts.User.valid_password?(user, user_params["current_password"] || "") do
+      case Accounts.update_user_password(user, user_params) do
+        {:ok, {updated, tokens}} ->
+          UserAuth.disconnect_sessions(tokens)
 
-    # disconnect all existing LiveViews with old sessions
-    UserAuth.disconnect_sessions(expired_tokens)
+          conn
+          |> put_flash(:info, "Password updated.")
+          |> UserAuth.log_in_user(updated, %{"remember_me" => "true"})
 
-    conn
-    |> put_session(:user_return_to, ~p"/users/settings")
-    |> put_flash(:info, "Password updated successfully!")
-    |> UserAuth.log_in_user(updated_user, params["user"])
+        {:error, _} ->
+          conn
+          |> put_flash(:error, "Use a matching password of 8–72 bytes.")
+          |> redirect(to: ~p"/app/settings")
+      end
+    else
+      conn
+      |> put_flash(:error, "Current password is incorrect.")
+      |> redirect(to: ~p"/app/settings")
+    end
   end
 
   def delete(conn, _params) do

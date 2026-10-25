@@ -1,126 +1,95 @@
 defmodule HabitTrackerWeb.SettingsLive do
   use HabitTrackerWeb, :live_view
 
-  alias HabitTracker.Accounts
+  def mount(_, _, socket),
+    do:
+      {:ok,
+       assign(socket,
+         today: HabitTracker.HealthJournal.Time.today(socket.assigns.current_scope.user.timezone)
+       )}
 
-  @impl true
-  def mount(_params, _session, socket) do
-    user = socket.assigns.current_scope.user
-
-    {:ok,
-     socket
-     |> assign(:page_title, "Settings")
-     |> assign(:user, user)
-     |> assign(:timezone_form, to_form(Accounts.change_user_timezone(user, %{})))
-     |> assign(:timezones, get_timezones())
-     |> assign_reminder_settings(user)}
-  end
-
-  defp assign_reminder_settings(socket, user) do
-    reminder_settings = HabitTracker.Reminders.get_reminder_settings(user)
-    habits = HabitTracker.Tracker.list_habits(user)
-
-    socket
-    |> assign(:reminder_settings, reminder_settings)
-    |> assign(:reminder_form, to_form(HabitTracker.Reminders.ReminderSettings.changeset(reminder_settings, %{})))
-    |> assign(:habits, habits)
-  end
-
-  @impl true
-  def handle_event("update_timezone", %{"user" => user_params}, socket) do
-    user = socket.assigns.user
-
-    case Accounts.update_user_timezone(user, user_params) do
-      {:ok, updated_user} ->
+  def handle_event("preferences", %{"user" => attrs}, socket) do
+    case HabitTracker.Accounts.update_user_timezone(socket.assigns.current_scope.user, attrs) do
+      {:ok, user} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Timezone updated successfully")
-         |> assign(:user, updated_user)
-         |> assign(:timezone_form, to_form(Accounts.change_user_timezone(updated_user, %{})))}
+         |> assign(:current_scope, HabitTracker.Accounts.Scope.for_user(user))
+         |> put_flash(:info, "Settings saved.")}
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, :timezone_form, to_form(changeset))}
+      _ ->
+        {:noreply, put_flash(socket, :error, "Choose a valid IANA timezone.")}
     end
   end
 
-  @impl true
-  def handle_event("toggle_reminders", _params, socket) do
-    user = socket.assigns.user
-    current_enabled = socket.assigns.reminder_settings.enabled
-
-    case HabitTracker.Reminders.update_reminder_settings(user, %{enabled: !current_enabled}) do
-      {:ok, updated_settings} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, if(!current_enabled, do: "Reminders enabled", else: "Reminders disabled"))
-         |> assign(:reminder_settings, updated_settings)
-         |> assign(:reminder_form, to_form(HabitTracker.Reminders.ReminderSettings.changeset(updated_settings, %{})))}
-
-      {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Failed to update reminder settings")}
-    end
-  end
-
-  @impl true
-  def handle_event("update_reminders", %{"reminder_settings" => reminder_params}, socket) do
-    user = socket.assigns.user
-
-    case HabitTracker.Reminders.update_reminder_settings(user, reminder_params) do
-      {:ok, updated_settings} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Reminder settings updated successfully")
-         |> assign(:reminder_settings, updated_settings)
-         |> assign(:reminder_form, to_form(HabitTracker.Reminders.ReminderSettings.changeset(updated_settings, %{})))}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :reminder_form, to_form(changeset))}
-    end
-  end
-
-  @impl true
-  def handle_event("validate_reminders", %{"reminder_settings" => reminder_params}, socket) do
-    reminder_settings = socket.assigns.reminder_settings
-
-    changeset =
-      reminder_settings
-      |> HabitTracker.Reminders.ReminderSettings.changeset(reminder_params)
-      |> Map.put(:action, :validate)
-
-    {:noreply, assign(socket, :reminder_form, to_form(changeset))}
-  end
-
-  @impl true
-  def handle_event("request_deletion", _params, socket) do
-    {:noreply, assign(socket, :show_deletion_modal, true)}
-  end
-
-  @impl true
-  def handle_event("cancel_deletion", _params, socket) do
-    {:noreply, assign(socket, :show_deletion_modal, false)}
-  end
-
-  @impl true
-  def handle_event("confirm_deletion", _params, socket) do
-    user = socket.assigns.user
-
-    case Accounts.soft_delete_user(user) do
-      {:ok, _deleted_user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Your account has been deleted. You will be logged out.")
-         |> redirect(to: ~p"/users/log-out")}
-
-      {:error, _changeset} ->
-        {:noreply,
-         socket
-         |> assign(:show_deletion_modal, false)
-         |> put_flash(:error, "Failed to delete account. Please try again.")}
-    end
-  end
-
-  defp get_timezones do
-    Tzdata.zone_list()
-    |> Enum.sort()
+  def render(assigns) do
+    ~H"""
+    <span id="connection-monitor" phx-hook="Connection" hidden></span>
+    <h1>Settings</h1>
+    <Layouts.flash_group flash={@flash} />
+    <.form for={%{}} phx-submit="preferences" id="preferences">
+      <label>
+        Timezone<input
+          name="user[timezone]"
+          value={@current_scope.user.timezone}
+          list="timezones"
+          required
+        />
+      </label>
+      <datalist id="timezones"><option :for={zone <- Tzdata.zone_list()} value={zone} /></datalist>
+      <input type="hidden" name="user[hide_previews]" value="false" />
+      <label>
+        <input
+          type="checkbox"
+          name="user[hide_previews]"
+          value="true"
+          checked={@current_scope.user.hide_previews}
+        /> Hide image previews
+      </label>
+      <button>Save preferences</button>
+    </.form>
+    <h2>Change password</h2>
+    <.form for={%{}} action={~p"/users/update-password"} id="password-form">
+      <label>
+        Current password<input
+          type="password"
+          name="user[current_password]"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+      <label>
+        New password<input
+          type="password"
+          name="user[password]"
+          autocomplete="new-password"
+          minlength="8"
+          maxlength="72"
+          required
+        />
+      </label>
+      <label>
+        Confirm new password<input
+          type="password"
+          name="user[password_confirmation]"
+          autocomplete="new-password"
+          required
+        />
+      </label>
+      <button>Change password</button>
+    </.form>
+    <h2>Export your data</h2>
+    <.form for={%{}} action={~p"/export"} method="get" id="export-form">
+      <label>From<input type="date" name="from" required /></label>
+      <label>Through<input type="date" name="to" value={@today} required /></label>
+      <button>Download ZIP</button>
+    </.form>
+    <h2>Home-screen app and drafts</h2>
+    <p>
+      In Safari, use Share → Add to Home Screen. Saving requires a connection. Text, ratings and time drafts are stored in this tab for 24 hours, isolated per account. Photos are not stored in drafts: reselect them after reload or interrupted upload.
+    </p>
+    <.link href={~p"/users/log-out"} method="delete" data-logout="true">
+      Log out and clear drafts in this tab
+    </.link>
+    """
   end
 end

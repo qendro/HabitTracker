@@ -8,7 +8,7 @@ config :habit_tracker, HabitTracker.Repo,
   database: System.get_env("DATABASE_NAME") || "habit_tracker_dev",
   port: String.to_integer(System.get_env("DATABASE_PORT") || "5432"),
   stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
+  show_sensitive_data_on_connection_error: false,
   pool_size: 10
 
 # For development, we disable any cache and enable
@@ -27,8 +27,7 @@ config :habit_tracker, HabitTrackerWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "Ey9PWjAPUZ3ChQxNtHP3WbRLxvdJbSMstmr7yEvmAUx6mFXDEnCRD5Hj3S6l/xCR",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:habit_tracker, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:habit_tracker, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:habit_tracker, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support
@@ -89,22 +88,3 @@ config :phoenix_live_view,
   debug_attributes: true,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
-
-# Configure Resend for email delivery in development
-# If RESEND_API_KEY is set, use Resend adapter, otherwise use Local adapter for testing
-if resend_api_key = System.get_env("RESEND_API_KEY") do
-  config :habit_tracker, HabitTracker.Mailer,
-    adapter: Swoosh.Adapters.Resend,
-    api_key: resend_api_key
-
-  config :swoosh, :api_client, Swoosh.ApiClient.Req
-else
-  # Fallback to local adapter if no API key is set
-  config :habit_tracker, HabitTracker.Mailer, adapter: Swoosh.Adapters.Local
-  config :swoosh, :api_client, false
-end
-
-# Configure application URLs for email links in development
-config :habit_tracker,
-  app_url: System.get_env("APP_URL", "http://localhost:4000"),
-  sender_email: System.get_env("SENDER_EMAIL", "noreply@localhost")

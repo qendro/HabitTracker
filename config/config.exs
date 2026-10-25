@@ -35,15 +35,6 @@ config :habit_tracker, HabitTrackerWeb.Endpoint,
   pubsub_server: HabitTracker.PubSub,
   live_view: [signing_salt: "FOnPILM8"]
 
-# Configure the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :habit_tracker, HabitTracker.Mailer, adapter: Swoosh.Adapters.Local
-
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
@@ -52,17 +43,6 @@ config :esbuild,
       ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
-  ]
-
-# Configure tailwind (the version is required)
-config :tailwind,
-  version: "4.1.12",
-  habit_tracker: [
-    args: ~w(
-      --input=assets/css/app.css
-      --output=priv/static/assets/css/app.css
-    ),
-    cd: Path.expand("..", __DIR__)
   ]
 
 # Configure Elixir's Logger
@@ -82,21 +62,18 @@ config :hammer,
   backend: {Hammer.Backend.ETS, [expiry_ms: 60_000, cleanup_interval_ms: 60_000]}
 
 config :habit_tracker, Oban,
-  engine: Oban.Engines.Basic,
-  queues: [default: 2, emails: 2, metrics: 1, cleanup: 1],
   repo: HabitTracker.Repo,
+  queues: [media: 1],
   plugins: [
-    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
-    {Oban.Plugins.Cron,
-     crontab: [
-       # Schedule reminders hourly
-       {"0 * * * *", HabitTracker.Workers.ScheduleRemindersJob},
-       # Calculate daily metrics at midnight UTC
-       {"0 0 * * *", HabitTracker.Workers.CalculateDailyMetricsJob},
-       # Purge deleted accounts at 2 AM UTC
-       {"0 2 * * *", HabitTracker.Workers.PurgeDeletedAccountsJob}
-     ]}
+    {Oban.Plugins.Pruner, max_age: 86400},
+    {Oban.Plugins.Cron, crontab: [{"*/15 * * * *", HabitTracker.Media.Reconcile}]}
   ]
+
+config :habit_tracker, :media_root, Path.expand("../tmp/media", __DIR__)
+config :habit_tracker, :max_photo_bytes, 25 * 1024 * 1024
+config :habit_tracker, :max_photo_pixels, 60_000_000
+config :phoenix, :filter_parameters, {:keep, []}
+config :habit_tracker, HabitTracker.Repo, log: false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

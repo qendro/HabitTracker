@@ -32,12 +32,7 @@ defmodule HabitTracker.AccountsFixtures do
   def user_fixture(attrs \\ %{}) do
     user = unconfirmed_user_fixture(attrs)
 
-    token =
-      extract_user_token(fn url ->
-        Accounts.deliver_user_confirmation_instructions(user, url)
-      end)
-
-    {:ok, user} = Accounts.confirm_user(token)
+    {:ok, user} = HabitTracker.Repo.update(HabitTracker.Accounts.User.confirm_changeset(user))
     user
   end
 

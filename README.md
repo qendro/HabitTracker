@@ -1,196 +1,77 @@
-# Habit Tracker
+# Health Journal
 
-A production-ready habit tracking web application built with Elixir Phoenix + LiveView.
+A private iPhone-first Phoenix LiveView journal for stool observations, wellbeing
+check-ins and timestamped notes. Multiple events per day, optional Bristol/urgency/
+rating fields, backdating, private normalized photos, timeline filters, timezone and
+preview settings, password management and ZIP exports are implemented. No public
+signup, habit scoring, diagnosis, integrations, analytics or notification features.
 
-Track your daily habits, build streaks, and achieve your goals with an intuitive, mobile-first interface.
+The OTP namespace/release remains `HabitTracker` / `habit_tracker`. Original history
+and applied migrations are preserved. Retired tables are left inert. Use a fresh,
+dedicated database for the new production deployment.
 
-## ✨ Features
+Local development (Elixir 1.19, OTP 28, PostgreSQL 17, ImageMagick with HEIC, zip):
 
-- **Flexible Habit Types**: Binary (done/not done), numeric (with targets), and duration tracking
-- **Smart Scheduling**: Daily or weekday-specific habit schedules
-- **Streak Tracking**: Automatic streak calculation with timezone awareness
-- **Time Travel**: Log habits for past, present, or future dates
-- **Email Reminders**: Configurable daily reminders via Resend
-- **Admin Dashboard**: System metrics and user management
-- **Mobile Optimized**: Responsive design with swipe gestures
-- **Dark Mode**: Light and dark theme support
-
-## 📁 Project Structure
-
-```
-habit-tracker/
-├── assets/              # Frontend assets (JS, CSS)
-├── config/              # Application configuration
-├── docker/              # Docker configuration files
-│   ├── docker-compose.yml
-│   ├── Dockerfile
-│   └── Dockerfile.dev
-├── docs/                # Documentation
-│   ├── README.md
-│   ├── ARCHITECTURE.md
-│   ├── DEVELOPMENT.md
-│   └── DEPLOYMENT.md
-├── lib/
-│   ├── habit_tracker/           # Business logic contexts
-│   │   ├── accounts/            # User authentication
-│   │   ├── admin/               # Admin functionality
-│   │   ├── reminders/           # Email reminders
-│   │   ├── tracker/             # Habit tracking
-│   │   └── workers/             # Background jobs
-│   └── habit_tracker_web/       # Web interface
-│       ├── components/          # Reusable UI components
-│       ├── controllers/         # HTTP controllers
-│       └── live/                # LiveView modules
-├── priv/
-│   ├── repo/migrations/         # Database migrations
-│   └── static/                  # Static assets
-├── scripts/             # Helper scripts (local)
-│   └── create_admin.sh
-├── test/                # Test files
-└── mix.exs              # Project configuration
+```sh
+make db
+mix setup
+mix run -e 'HabitTracker.Release.owner()' # use a local private terminal
+mix phx.server
 ```
 
-## 🚀 Quick Start
+Owner commands require a private interactive Linux terminal and disable password echo.
+Do not put passwords in command arguments or source files. `make check` runs formatting,
+strict compilation and ExUnit. `mix assets.build` copies CSS and bundles local JS.
+No development command references production configuration.
 
-**This project is Docker-first - no local Elixir/Node.js installation required.**
+[Architecture/baseline](docs/IMPLEMENTATION.md) · [Validation](docs/VALIDATION.md).
 
-### Using Docker (Recommended)
+Install in iPhone Safari using Share → Add to Home Screen. Sessions can persist for
+30 days and rotate after 14 days. All saves require a live server connection. The app
+shows a disconnected banner and confirms saving only after a database write. Text,
+ratings, retry ID and event time drafts live in **sessionStorage in the current tab**
+for 24 hours and are isolated per account/form; logout clears drafts, including other
+open tabs where BroadcastChannel is available. Draft storage can be unavailable in
+restricted browsing modes. Images are never saved in browser storage; reselect them
+after an interrupted upload/reload. No service worker is installed, so there is no
+private HTML/photo/export caching or claim of full offline operation.
 
-```bash
-# First-time setup (starts services + DB setup)
-make setup
+Photos accept JPEG, PNG and HEIC/HEIF. Original filenames never become storage paths.
+The app retains oriented, stripped JPEG display images (max 4096px) and thumbnails,
+not untouched originals. It does not infer findings or use EXIF time as event time.
+Up to 3 photos per stool event; default input limits are 25 MiB and 60 megapixels.
+A saved event survives a failed attachment, which can be retried or removed. Failed
+sources remain private until deletion; pending jobs are reconciled every 15 minutes.
+Exports contain schema/timezone metadata, JSON, formula-escaped CSV, and normalized
+photos identified by stable entry/attachment IDs. Exports are temporary, not backups.
 
-# Daily use
-make up
+**Scope:** application and local development. At the owner's later request, Oracle,
+ARM64 emulation, production deployment validation and provisional server-operation
+scripts were removed from this work. No Oracle instance was accessed or changed.
+The optional release Dockerfile is unverified; deployment, resource sizing, encrypted
+off-host backups and restore rehearsals remain the owner's responsibility. Export
+is not a backup. Keep PostgreSQL and the configured private media root together.
+Actual iPhone checks require a device and are tracked in the validation checklist.
 
-# In another terminal, create an admin account
-make create-admin
+Owner provision/reset (private interactive terminal; password echo is disabled):
+
+```sh
+mix run -e 'HabitTracker.Release.owner()'              # refuses an existing account
+OWNER_RESET=YES mix run -e 'HabitTracker.Release.owner()' # explicit password recovery
 ```
 
-The application will be available at http://localhost:4000
+The command reads email and password from stdin; it never resets an owner at boot.
+Password recovery revokes existing sessions. In an eventual release, the equivalent
+command is `bin/habit_tracker eval 'HabitTracker.Release.owner()'` with the same
+explicit `OWNER_RESET=YES` option for recovery. Use `HabitTracker.Release.migrate()`
+for additive release migrations; do not reset an existing database.
 
-**See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deployment instructions.**
-
-## 📚 Documentation
-
-- **[docs/README.md](docs/README.md)** - Documentation index
-- **[DEVELOPMENT.md](docs/DEVELOPMENT.md)** - Local development workflow
-- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Docker / Northflank deployment guide
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
-- **[Docker README](docker/README.md)** - Docker setup details
-
-## ⚙️ Configuration
-
-Environment variables are configured via:
-- **Development**: `.env` file (copy from `.env.dev` template)
-- **Production**: Platform secrets / environment config (Northflank or Gigalixir)
-
-## 🏗️ Architecture
-
-**Stack:**
-- Backend: Elixir 1.19+ with Phoenix 1.8+ and LiveView
-- Database: PostgreSQL 15+
-- Styling: Tailwind CSS (via mix tooling)
-- Email: Resend API via Swoosh
-- Background Jobs: Oban
-- Deployment: Docker (Northflank / Gigalixir)
-- Error Tracking: Sentry
-
-**Key Design Principles:**
-- Timezone-aware date calculations
-- Sparse storage (only explicit logs)
-- Mobile-first responsive design
-- Defense-in-depth security
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation.
-
-## 🧪 Testing
-
-```bash
-# With Docker
-make test
-
-# Without Docker
-mix test
-
-# Run precommit checks
-make precommit
-```
-
-## 🚢 Deployment
-
-This application deploys via Docker.
-
-For Northflank, follow the steps in `docs/DEPLOYMENT.md`.
-
-Gigalixir commands:
-
-```bash
-# First time setup
-make gigalixir-create
-
-# Deploy
-make gigalixir-deploy
-
-# Run migrations
-make gigalixir-migrate
-
-# Create admin
-make gigalixir-admin
-```
-
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment instructions.
-
-## 🔒 Security
-
-Comprehensive security implementation:
-- Bcrypt password hashing (cost 12)
-- Rate limiting on authentication endpoints
-- CSRF protection on all forms
-- SQL injection prevention via Ecto
-- Input validation and sanitization
-- Secure session management
-- Admin action audit logging
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for security details.
-
-## 🤝 Contributing
-
-1. Create a feature branch
-2. Make your changes and add tests
-3. Run `make precommit` to ensure all checks pass
-4. Submit a pull request
-
-## 📂 Quick Reference
-
-**Common Commands:**
-```bash
-make help              # See all commands
-make up                # Start dev server
-make test              # Run tests
-make gigalixir-deploy  # Deploy to production
-```
-
-**Documentation:**
-- Development: `docs/DEVELOPMENT.md`
-- Deployment: `docs/DEPLOYMENT.md`
-- Architecture: `docs/ARCHITECTURE.md`
-- Docker: `docker/README.md`
-
-## 📊 Project Status
-
-This project follows a spec-driven development approach. See `.kiro/specs/habit-tracker/tasks.md` for implementation progress.
-
-**Current Status:** Production-ready with core features complete. See tasks.md for remaining optional enhancements.
-
-## 📝 License
-
-[Add your license here]
-
-## 🔗 Resources
-
-- [Phoenix Framework](https://www.phoenixframework.org/)
-- [Phoenix LiveView](https://hexdocs.pm/phoenix_live_view/)
-- [Ecto](https://hexdocs.pm/ecto/)
-- [Elixir](https://elixir-lang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
+Release configuration (for whoever hosts the app): `DATABASE_URL`, `PHX_HOST`,
+`SECRET_KEY_BASE` (at least 64 bytes), and an absolute persistent `MEDIA_ROOT` are
+required. Optional settings are `PORT` (4000), `POOL_SIZE` (5), `MAX_PHOTO_BYTES`
+(26214400), and `MAX_PHOTO_PIXELS` (60000000). `PHX_SERVER=true` starts HTTP.
+HTTPS/origin configuration expects the chosen hostname and a trusted proxy that
+sets X-Forwarded-Proto; `/health` is the HTTP health-check exception. Neither
+PostgreSQL nor the media root should be public. No mail or external error-reporting
+credentials are required. The optional Dockerfile is source only, not a validated
+production artifact.

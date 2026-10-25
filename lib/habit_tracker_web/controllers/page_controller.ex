@@ -1,13 +1,9 @@
 defmodule HabitTrackerWeb.PageController do
   use HabitTrackerWeb, :controller
 
-  def home(conn, _params) do
-    # Redirect authenticated users to their today dashboard
-    if conn.assigns[:current_scope] do
-      redirect(conn, to: ~p"/app/today")
-    else
-      # Show welcome page to unauthenticated users
-      redirect(conn, to: ~p"/welcome")
-    end
-  end
+  def home(conn, _),
+    do:
+      redirect(conn,
+        to: if(conn.assigns.current_scope, do: ~p"/app/today", else: ~p"/users/log-in")
+      )
 end

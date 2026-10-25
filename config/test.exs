@@ -26,17 +26,6 @@ config :habit_tracker, HabitTrackerWeb.Endpoint,
   secret_key_base: "BNI36nRwkaSBUeLOx2LDsqs9990j+sjqSEULtpgD9E7alQlF0gV8o5eSfwnylRXn",
   server: false
 
-# In test we don't send emails
-config :habit_tracker, HabitTracker.Mailer, adapter: Swoosh.Adapters.Test
-
-# Disable swoosh api client as it is only required for production adapters
-config :swoosh, :api_client, false
-
-# Configure application URLs for email links in test
-config :habit_tracker,
-  app_url: "http://localhost:4002",
-  sender_email: "noreply@test.com"
-
 # Print only warnings and errors during test
 config :logger, level: :warning
 
@@ -54,4 +43,6 @@ config :phoenix,
 config :habit_tracker, :rate_limiting, false
 
 # Configure Oban for testing (disable queues and plugins)
-config :habit_tracker, Oban, testing: :inline
+config :habit_tracker, Oban, testing: :manual, queues: false, plugins: false
+
+config :habit_tracker, :media_root, Path.expand("../tmp/test-media", __DIR__)

@@ -35,16 +35,10 @@ habit_tracker-*.tar
 npm-debug.log
 /assets/node_modules/
 
-# Environment files (keep templates only)
+# Private environment files (track placeholders only)
 .env
-.env.local
-.env.development
-.env.production.local
-.env.gigalixir
-.env.northflank
-docker/docker-compose.override.yml
-.northflank_token
-.northflank_secret
+.env.*
+!*.example
 
 # IDE
 .idea/
@@ -56,3 +50,10 @@ docker/docker-compose.override.yml
 # OS
 .DS_Store
 Thumbs.db
+
+/media/
+/exports/
+/backups/
+*.age
+*.dump
+!deploy/env.example

@@ -4,6 +4,7 @@ defmodule HabitTracker.MixProject do
   def project do
     [
       app: :habit_tracker,
+      listeners: [Phoenix.CodeReloader],
       version: "0.1.0",
       elixir: "~> 1.19",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -40,26 +41,10 @@ defmodule HabitTracker.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.1.0"},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:stream_data, "~> 1.1", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
-      {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.2.0",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
-      {:swoosh, "~> 1.16"},
-      {:req, "~> 0.5"},
       {:oban, "~> 2.18"},
-      {:sentry, "~> 10.0"},
-      {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
-      {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"}
     ]
   end
@@ -69,12 +54,15 @@ defmodule HabitTracker.MixProject do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind habit_tracker", "esbuild habit_tracker"],
+      "assets.setup": ["esbuild.install --if-missing"],
+      "assets.build": ["compile", "assets.css", "esbuild habit_tracker"],
+      "assets.css": fn _ ->
+        File.mkdir_p!("priv/static/assets/css")
+        File.cp!("assets/css/app.css", "priv/static/assets/css/app.css")
+      end,
       "assets.deploy": [
-        "tailwind habit_tracker --minify",
+        "assets.css",
         "esbuild habit_tracker --minify",
         "phx.digest"
       ],
